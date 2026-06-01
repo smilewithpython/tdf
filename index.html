@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#141210">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<title>Try · Do · Fail</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #141210;
+    --bg2: #1e1b18;
+    --ink: #f0ebe3;
+    --ink2: #a89f96;
+    --ink3: #6b6259;
+    --try: #4ade9a;
+    --do: #60a5fa;
+    --fail: #f87171;
+    --stock: #fbbf24;
+    --border: rgba(240,235,227,0.10);
+    --radius: 14px;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg); color-scheme: dark;
+    color: var(--ink);
+    font-family: 'DM Mono', monospace;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .app {
+    min-height: 100vh;
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 1.5rem 1.25rem 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  /* Header */
+  .header { text-align: center; padding-bottom: 0.25rem; }
+  .header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .header .sub {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--ink3);
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  /* Section heading */
+  .sec-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: -0.35rem;
+  }
+  .sec-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    color: var(--ink);
+  }
+  .sec-sub {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink3);
+  }
+
+  /* Stats */
+  .stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .stat-card {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1rem 0.875rem;
+  }
+  .stat-label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    margin-bottom: 5px;
+  }
+  .stat-num {
+    font-size: 2.5rem;
+    font-weight: 500;
+    line-height: 1;
+    color: var(--ink);
+  }
+  .stat-meta {
+    font-size: 11px;
+    color: var(--ink3);
+    margin-top: 4px;
+  }
+
+  /* Progress-to-best bar */
+  .pace {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.75rem 1rem 0.875rem;
+  }
+  .pace-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--ink2);
+    margin-bottom: 8px;
+  }
+  .pace-row .pace-streak { color: var(--ink3); }
+  .pace-row .pace-streak strong { color: var(--ink); }
+  .bar {
+    height: 6px;
+    border-radius: 100px;
+    background: rgba(240,235,227,0.07);
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 100px;
+    width: 0%;
+    transition: width 0.35s cubic-bezier(.2,.8,.2,1);
+  }
+  .pace.tasks .bar-fill { background: var(--do); }
+  .pace.stock .bar-fill { background: var(--stock); }
+  .pace.record .bar-fill { background: linear-gradient(90deg, var(--try), var(--stock)); }
+  .pace .pace-best { color: var(--ink); }
+
+  /* Buttons */
+  .buttons { display: flex; flex-direction: column; gap: 10px; }
+
+  .tap-btn {
+    width: 100%;
+    padding: 1.25rem 1.375rem;
+    border-radius: var(--radius);
+    border: 0.5px solid var(--border);
+    background: var(--bg2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    transition: transform 0.08s ease, background 0.08s ease;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .tap-btn:active { transform: scale(0.975); }
+
+  .btn-label {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.375rem;
+    letter-spacing: -0.01em;
+  }
+  .btn-pts {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--ink3);
+  }
+
+  .tap-btn.try-btn .btn-label { color: var(--try); }
+  .tap-btn.do-btn .btn-label { color: var(--do); }
+  .tap-btn.fail-btn .btn-label { color: var(--fail); }
+  .tap-btn.stock-btn .btn-label { color: var(--stock); }
+
+  .tap-btn.flash-try { background: #1a3d2b; }
+  .tap-btn.flash-do { background: #172e4a; }
+  .tap-btn.flash-fail { background: #3d1a1e; }
+  .tap-btn.flash-stock { background: #3d3416; }
+
+  /* Big stock counter inside its button */
+  .stock-count {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    color: var(--stock);
+  }
+
+  /* Small buttons */
+  .actions { display: flex; gap: 8px; }
+  .action-btn {
+    flex: 1;
+    padding: 0.625rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--ink2);
+    border: 0.5px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg2);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: transform 0.08s;
+  }
+  .action-btn:active { transform: scale(0.97); }
+  .action-btn.full { flex: none; width: 100%; }
+
+  .divider {
+    height: 0.5px;
+    background: var(--border);
+    margin: 0.25rem 0;
+  }
+
+  /* Log */
+  .log-heading {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    margin-bottom: 8px;
+  }
+  .log-list { display: flex; flex-direction: column; gap: 5px; }
+  .log-item {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: 10px;
+    padding: 0.5rem 0.875rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+  }
+  .log-type { font-weight: 500; }
+  .log-type.t-try { color: var(--try); }
+  .log-type.t-do { color: var(--do); }
+  .log-type.t-fail { color: var(--fail); }
+  .log-type.t-stock { color: var(--stock); }
+  .log-right { color: var(--ink3); display: flex; gap: 12px; }
+  .log-empty {
+    font-size: 12px;
+    color: var(--ink3);
+    text-align: center;
+    padding: 1.5rem 0;
+    letter-spacing: 0.04em;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%) translateY(8px);
+    background: var(--bg2);
+    color: var(--ink);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    padding: 8px 18px;
+    border-radius: 100px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    white-space: nowrap;
+    border: 0.5px solid var(--border);
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  .toast.record {
+    background: linear-gradient(90deg, #1a3d2b, #3d3416);
+    border-color: rgba(251,191,36,0.4);
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <h1>Try · Do · Fail</h1>
+    <p class="sub" id="today-date">daily points tracker</p>
+  </div>
+
+  <!-- ============ TASKS ============ -->
+  <div class="sec-head">
+    <span class="sec-title">Tasks</span>
+    <span class="sec-sub" id="task-total">0 total</span>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-label">Today</div>
+      <div class="stat-num" id="today-pts">0</div>
+      <div class="stat-meta">points</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Best day</div>
+      <div class="stat-num" id="best-pts">0</div>
+      <div class="stat-meta" id="best-date">—</div>
+    </div>
+  </div>
+
+  <div class="pace tasks" id="task-pace">
+    <div class="pace-row">
+      <span id="task-pace-msg">—</span>
+      <span class="pace-streak">streak <strong id="streak-val">0</strong></span>
+    </div>
+    <div class="bar"><div class="bar-fill" id="task-bar"></div></div>
+  </div>
+
+  <div class="buttons">
+    <button class="tap-btn try-btn" id="btn-try">
+      <span class="btn-label">Try</span>
+      <span class="btn-pts">+1 PT</span>
+    </button>
+    <button class="tap-btn do-btn" id="btn-do">
+      <span class="btn-label">Do</span>
+      <span class="btn-pts">+2 PTS</span>
+    </button>
+    <button class="tap-btn fail-btn" id="btn-fail">
+      <span class="btn-label">Fail</span>
+      <span class="btn-pts">+4 PTS</span>
+    </button>
+  </div>
+
+  <button class="action-btn full" id="btn-undo-task">↩ undo last task</button>
+
+  <div class="divider"></div>
+
+  <!-- ============ STOCK SIMS ============ -->
+  <div class="sec-head">
+    <span class="sec-title">Stock sims</span>
+    <span class="sec-sub" id="stock-total">0 total</span>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-label">Today</div>
+      <div class="stat-num" id="stock-today">0</div>
+      <div class="stat-meta">simulations</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Best day</div>
+      <div class="stat-num" id="stock-best">0</div>
+      <div class="stat-meta" id="stock-best-date">—</div>
+    </div>
+  </div>
+
+  <div class="pace stock" id="stock-pace">
+    <div class="pace-row">
+      <span id="stock-pace-msg">—</span>
+      <span class="pace-streak">streak <strong id="stock-streak-val">0</strong></span>
+    </div>
+    <div class="bar"><div class="bar-fill" id="stock-bar"></div></div>
+  </div>
+
+  <button class="tap-btn stock-btn" id="btn-stock">
+    <span class="btn-label">+ Simulation</span>
+    <span class="stock-count" id="stock-count-inline">0</span>
+  </button>
+
+  <button class="action-btn full" id="btn-undo-stock">↩ undo last sim</button>
+
+  <div class="divider"></div>
+
+  <!-- ============ LOG + DATA ============ -->
+  <div>
+    <div class="log-heading">Today's log</div>
+    <div class="log-list" id="log-list"></div>
+  </div>
+
+  <div class="actions">
+    <button class="action-btn" id="btn-export">↓ export backup</button>
+    <button class="action-btn" id="btn-import">↑ import backup</button>
+  </div>
+  <input type="file" id="import-file" accept="application/json" style="display:none">
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const KEY = 'tdf_v2';
+
+const PTS = { try: 1, do: 2, fail: 4 };
+
+function today() {
+  return new Date().toLocaleDateString('en-CA');
+}
+function yesterday() {
+  return new Date(Date.now() - 86400000).toLocaleDateString('en-CA');
+}
+
+function fresh() {
+  return {
+    entries: [],
+    stockEntries: [],
+    best: { pts: 0, date: null },
+    stockBest: { count: 0, date: null },
+    streak: 0, lastDate: null,
+    stockStreak: 0, stockLastDate: null
+  };
+}
+
+function load() {
+  const base = fresh();
+  try {
+    const r = localStorage.getItem(KEY) || localStorage.getItem('tdf_v1');
+    if (r) {
+      const parsed = JSON.parse(r);
+      return Object.assign(base, parsed, {
+        best: Object.assign(base.best, parsed.best || {}),
+        stockBest: Object.assign(base.stockBest, parsed.stockBest || {})
+      });
+    }
+  } catch (e) {}
+  return base;
+}
+
+function save(d) {
+  try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
+}
+
+function entriesToday(arr) {
+  const t = today();
+  return arr.filter(e => e.date === t);
+}
+function taskPtsToday(d) {
+  return entriesToday(d.entries).reduce((s, e) => s + e.pts, 0);
+}
+function stockToday(d) {
+  return entriesToday(d.stockEntries).length;
+}
+
+// Streak bumps once per day on the first action of that kind.
+function bumpStreak(d, lastKey, streakKey) {
+  const t = today();
+  if (d[lastKey] !== t) {
+    if (!d[lastKey]) d[streakKey] = 1;
+    else if (d[lastKey] === yesterday()) d[streakKey] = (d[streakKey] || 0) + 1;
+    else d[streakKey] = 1;
+    d[lastKey] = t;
+  }
+}
+
+function pct(now, best) {
+  if (best <= 0) return now > 0 ? 100 : 0;
+  return Math.min(100, Math.round((now / best) * 100));
+}
+
+function paceMsg(now, best, unit) {
+  if (best <= 0) return now > 0 ? 'first record in the books' : 'set your first record';
+  if (now > best) return '★ new best — keep going';
+  if (now === best) return 'tied your best — one more!';
+  return (best - now) + ' ' + unit + ' to beat your best (' + best + ')';
+}
+
+function render() {
+  const d = load();
+  const t = today();
+
+  document.getElementById('today-date').textContent =
+    new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+
+  // Tasks
+  const tp = taskPtsToday(d);
+  document.getElementById('today-pts').textContent = tp;
+  document.getElementById('best-pts').textContent = d.best.pts;
+  document.getElementById('best-date').textContent = d.best.date
+    ? new Date(d.best.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    : '—';
+  document.getElementById('streak-val').textContent = d.streak || 0;
+  document.getElementById('task-total').textContent = d.entries.length + ' total';
+  document.getElementById('task-pace-msg').textContent = paceMsg(tp, d.best.pts, 'pts');
+  document.getElementById('task-bar').style.width = pct(tp, d.best.pts) + '%';
+  document.getElementById('task-pace').classList.toggle('record', d.best.pts > 0 && tp >= d.best.pts);
+
+  // Stock
+  const sc = stockToday(d);
+  document.getElementById('stock-today').textContent = sc;
+  document.getElementById('stock-count-inline').textContent = sc;
+  document.getElementById('stock-best').textContent = d.stockBest.count;
+  document.getElementById('stock-best-date').textContent = d.stockBest.date
+    ? new Date(d.stockBest.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    : '—';
+  document.getElementById('stock-streak-val').textContent = d.stockStreak || 0;
+  document.getElementById('stock-total').textContent = d.stockEntries.length + ' total';
+  document.getElementById('stock-pace-msg').textContent = paceMsg(sc, d.stockBest.count, 'more');
+  document.getElementById('stock-bar').style.width = pct(sc, d.stockBest.count) + '%';
+  document.getElementById('stock-pace').classList.toggle('record', d.stockBest.count > 0 && sc >= d.stockBest.count);
+
+  // Combined log
+  const items = [];
+  entriesToday(d.entries).forEach(e => items.push({ kind: e.type, label: e.type, meta: '+' + e.pts + ' pt' + (e.pts > 1 ? 's' : ''), ts: e.ts }));
+  entriesToday(d.stockEntries).forEach(e => items.push({ kind: 'stock', label: 'sim', meta: 'simulation', ts: e.ts }));
+  items.sort((a, b) => new Date(b.ts) - new Date(a.ts));
+
+  const listEl = document.getElementById('log-list');
+  if (!items.length) {
+    listEl.innerHTML = '<div class="log-empty">nothing logged yet today</div>';
+  } else {
+    listEl.innerHTML = items.map(e => {
+      const time = new Date(e.ts).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      return '<div class="log-item">' +
+        '<span class="log-type t-' + e.kind + '">' + e.label + '</span>' +
+        '<span class="log-right"><span>' + e.meta + '</span><span>' + time + '</span></span>' +
+        '</div>';
+    }).join('');
+  }
+}
+
+function toast(msg, isRecord) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.toggle('record', !!isRecord);
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 1800);
+}
+
+function flash(btn, cls) {
+  btn.classList.add(cls);
+  setTimeout(() => btn.classList.remove(cls), 150);
+}
+
+function logTask(type, btn, flashClass) {
+  const d = load();
+  const t = today();
+  const pts = PTS[type];
+  d.entries.push({ type, pts, date: t, ts: new Date().toISOString() });
+  bumpStreak(d, 'lastDate', 'streak');
+  const tp = taskPtsToday(d);
+  let record = false;
+  if (tp > d.best.pts) { d.best = { pts: tp, date: t }; record = d.best.pts > pts; }
+  save(d);
+  render();
+  flash(btn, flashClass);
+  if (record) toast('★ new best day — ' + tp + ' pts', true);
+  else toast('+' + pts + ' point' + (pts > 1 ? 's' : ''));
+}
+
+document.getElementById('btn-try').addEventListener('click', function () { logTask('try', this, 'flash-try'); });
+document.getElementById('btn-do').addEventListener('click', function () { logTask('do', this, 'flash-do'); });
+document.getElementById('btn-fail').addEventListener('click', function () { logTask('fail', this, 'flash-fail'); });
+
+document.getElementById('btn-stock').addEventListener('click', function () {
+  const d = load();
+  const t = today();
+  d.stockEntries.push({ date: t, ts: new Date().toISOString() });
+  bumpStreak(d, 'stockLastDate', 'stockStreak');
+  const sc = stockToday(d);
+  let record = false;
+  if (sc > d.stockBest.count) { d.stockBest = { count: sc, date: t }; record = sc > 1; }
+  save(d);
+  render();
+  flash(this, 'flash-stock');
+  if (record) toast('★ new best — ' + sc + ' sims today', true);
+  else toast('sim #' + sc + ' logged');
+});
+
+function undoFrom(arrKey, recomputeBest) {
+  const d = load();
+  const t = today();
+  const arr = d[arrKey];
+  const idxs = arr.reduce((a, e, i) => { if (e.date === t) a.push(i); return a; }, []);
+  if (!idxs.length) { toast('nothing to undo today'); return; }
+  const removed = arr.splice(idxs[idxs.length - 1], 1)[0];
+  recomputeBest(d, t);
+  save(d);
+  render();
+  return removed;
+}
+
+document.getElementById('btn-undo-task').addEventListener('click', function () {
+  const removed = undoFrom('entries', (d, t) => {
+    if (d.best.date === t) d.best.pts = taskPtsToday(d);
+  });
+  if (removed) toast('undid ' + removed.type + ' (−' + removed.pts + ' pt' + (removed.pts > 1 ? 's' : '') + ')');
+});
+
+document.getElementById('btn-undo-stock').addEventListener('click', function () {
+  const removed = undoFrom('stockEntries', (d, t) => {
+    if (d.stockBest.date === t) d.stockBest.count = stockToday(d);
+  });
+  if (removed) toast('undid 1 simulation');
+});
+
+document.getElementById('btn-export').addEventListener('click', function () {
+  const d = load();
+  const blob = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'tdf_tracker_' + today() + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('backup exported');
+});
+
+document.getElementById('btn-import').addEventListener('click', function () {
+  document.getElementById('import-file').click();
+});
+document.getElementById('import-file').addEventListener('change', function (ev) {
+  const file = ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function () {
+    try {
+      const parsed = JSON.parse(reader.result);
+      if (!Array.isArray(parsed.entries)) throw new Error('bad file');
+      if (!confirm('Replace all current data with this backup? This cannot be undone.')) return;
+      save(Object.assign(fresh(), parsed));
+      render();
+      toast('backup imported');
+    } catch (e) {
+      toast('could not read that file');
+    }
+  };
+  reader.readAsText(file);
+  ev.target.value = '';
+});
+
+render();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js').catch(function () {});
+  });
+}
+</script>
+</body>
+</html>

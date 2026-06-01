@@ -26,6 +26,8 @@
     --do: #60a5fa;
     --fail: #f87171;
     --stock: #fbbf24;
+    --trade: #a78bfa;
+    --hold: #2dd4bf;
     --border: rgba(240,235,227,0.10);
     --radius: 14px;
   }
@@ -48,7 +50,6 @@
     gap: 1.25rem;
   }
 
-  /* Header */
   .header { text-align: center; padding-bottom: 0.25rem; }
   .header h1 {
     font-family: 'Playfair Display', serif;
@@ -65,7 +66,6 @@
     margin-top: 4px;
   }
 
-  /* Section heading */
   .sec-head {
     display: flex;
     align-items: baseline;
@@ -84,12 +84,7 @@
     color: var(--ink3);
   }
 
-  /* Stats */
-  .stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .stat-card {
     background: var(--bg2);
     border: 0.5px solid var(--border);
@@ -103,19 +98,9 @@
     color: var(--ink3);
     margin-bottom: 5px;
   }
-  .stat-num {
-    font-size: 2.5rem;
-    font-weight: 500;
-    line-height: 1;
-    color: var(--ink);
-  }
-  .stat-meta {
-    font-size: 11px;
-    color: var(--ink3);
-    margin-top: 4px;
-  }
+  .stat-num { font-size: 2.5rem; font-weight: 500; line-height: 1; color: var(--ink); }
+  .stat-meta { font-size: 11px; color: var(--ink3); margin-top: 4px; }
 
-  /* Progress-to-best bar */
   .pace {
     background: var(--bg2);
     border: 0.5px solid var(--border);
@@ -132,12 +117,7 @@
   }
   .pace-row .pace-streak { color: var(--ink3); }
   .pace-row .pace-streak strong { color: var(--ink); }
-  .bar {
-    height: 6px;
-    border-radius: 100px;
-    background: rgba(240,235,227,0.07);
-    overflow: hidden;
-  }
+  .bar { height: 6px; border-radius: 100px; background: rgba(240,235,227,0.07); overflow: hidden; }
   .bar-fill {
     height: 100%;
     border-radius: 100px;
@@ -146,10 +126,9 @@
   }
   .pace.tasks .bar-fill { background: var(--do); }
   .pace.stock .bar-fill { background: var(--stock); }
+  .pace.trade .bar-fill { background: var(--trade); }
   .pace.record .bar-fill { background: linear-gradient(90deg, var(--try), var(--stock)); }
-  .pace .pace-best { color: var(--ink); }
 
-  /* Buttons */
   .buttons { display: flex; flex-direction: column; gap: 10px; }
 
   .tap-btn {
@@ -186,20 +165,18 @@
   .tap-btn.do-btn .btn-label { color: var(--do); }
   .tap-btn.fail-btn .btn-label { color: var(--fail); }
   .tap-btn.stock-btn .btn-label { color: var(--stock); }
+  .tap-btn.trade-btn .btn-label { color: var(--trade); }
+  .tap-btn.hold-btn .btn-label { color: var(--hold); }
 
   .tap-btn.flash-try { background: #1a3d2b; }
   .tap-btn.flash-do { background: #172e4a; }
   .tap-btn.flash-fail { background: #3d1a1e; }
   .tap-btn.flash-stock { background: #3d3416; }
+  .tap-btn.flash-trade { background: #2a2147; }
+  .tap-btn.flash-hold { background: #103833; }
 
-  /* Big stock counter inside its button */
-  .stock-count {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.6rem;
-    color: var(--stock);
-  }
+  .stock-count { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--stock); }
 
-  /* Small buttons */
   .actions { display: flex; gap: 8px; }
   .action-btn {
     flex: 1;
@@ -220,13 +197,8 @@
   .action-btn:active { transform: scale(0.97); }
   .action-btn.full { flex: none; width: 100%; }
 
-  .divider {
-    height: 0.5px;
-    background: var(--border);
-    margin: 0.25rem 0;
-  }
+  .divider { height: 0.5px; background: var(--border); margin: 0.25rem 0; }
 
-  /* Log */
   .log-heading {
     font-size: 10px;
     letter-spacing: 0.12em;
@@ -250,6 +222,8 @@
   .log-type.t-do { color: var(--do); }
   .log-type.t-fail { color: var(--fail); }
   .log-type.t-stock { color: var(--stock); }
+  .log-type.t-trade { color: var(--trade); }
+  .log-type.t-hold { color: var(--hold); }
   .log-right { color: var(--ink3); display: flex; gap: 12px; }
   .log-empty {
     font-size: 12px;
@@ -259,7 +233,6 @@
     letter-spacing: 0.04em;
   }
 
-  /* Toast */
   .toast {
     position: fixed;
     bottom: 28px;
@@ -278,10 +251,7 @@
     white-space: nowrap;
     border: 0.5px solid var(--border);
   }
-  .toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   .toast.record {
     background: linear-gradient(90deg, #1a3d2b, #3d3416);
     border-color: rgba(251,191,36,0.4);
@@ -301,7 +271,6 @@
     <span class="sec-title">Tasks</span>
     <span class="sec-sub" id="task-total">0 total</span>
   </div>
-
   <div class="stats">
     <div class="stat-card">
       <div class="stat-label">Today</div>
@@ -314,7 +283,6 @@
       <div class="stat-meta" id="best-date">—</div>
     </div>
   </div>
-
   <div class="pace tasks" id="task-pace">
     <div class="pace-row">
       <span id="task-pace-msg">—</span>
@@ -322,22 +290,11 @@
     </div>
     <div class="bar"><div class="bar-fill" id="task-bar"></div></div>
   </div>
-
   <div class="buttons">
-    <button class="tap-btn try-btn" id="btn-try">
-      <span class="btn-label">Try</span>
-      <span class="btn-pts">+1 PT</span>
-    </button>
-    <button class="tap-btn do-btn" id="btn-do">
-      <span class="btn-label">Do</span>
-      <span class="btn-pts">+2 PTS</span>
-    </button>
-    <button class="tap-btn fail-btn" id="btn-fail">
-      <span class="btn-label">Fail</span>
-      <span class="btn-pts">+4 PTS</span>
-    </button>
+    <button class="tap-btn try-btn" id="btn-try"><span class="btn-label">Try</span><span class="btn-pts">+1 PT</span></button>
+    <button class="tap-btn do-btn" id="btn-do"><span class="btn-label">Do</span><span class="btn-pts">+2 PTS</span></button>
+    <button class="tap-btn fail-btn" id="btn-fail"><span class="btn-label">Fail</span><span class="btn-pts">+4 PTS</span></button>
   </div>
-
   <button class="action-btn full" id="btn-undo-task">↩ undo last task</button>
 
   <div class="divider"></div>
@@ -347,7 +304,6 @@
     <span class="sec-title">Stock sims</span>
     <span class="sec-sub" id="stock-total">0 total</span>
   </div>
-
   <div class="stats">
     <div class="stat-card">
       <div class="stat-label">Today</div>
@@ -360,7 +316,6 @@
       <div class="stat-meta" id="stock-best-date">—</div>
     </div>
   </div>
-
   <div class="pace stock" id="stock-pace">
     <div class="pace-row">
       <span id="stock-pace-msg">—</span>
@@ -368,13 +323,43 @@
     </div>
     <div class="bar"><div class="bar-fill" id="stock-bar"></div></div>
   </div>
-
   <button class="tap-btn stock-btn" id="btn-stock">
     <span class="btn-label">+ Simulation</span>
     <span class="stock-count" id="stock-count-inline">0</span>
   </button>
-
   <button class="action-btn full" id="btn-undo-stock">↩ undo last sim</button>
+
+  <div class="divider"></div>
+
+  <!-- ============ TRADING ============ -->
+  <div class="sec-head">
+    <span class="sec-title">Trading</span>
+    <span class="sec-sub" id="trade-total">0 total</span>
+  </div>
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-label">Today</div>
+      <div class="stat-num" id="trade-today">0</div>
+      <div class="stat-meta">points</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Best day</div>
+      <div class="stat-num" id="trade-best">0</div>
+      <div class="stat-meta" id="trade-best-date">—</div>
+    </div>
+  </div>
+  <div class="pace trade" id="trade-pace">
+    <div class="pace-row">
+      <span id="trade-pace-msg">—</span>
+      <span class="pace-streak">streak <strong id="trade-streak-val">0</strong></span>
+    </div>
+    <div class="bar"><div class="bar-fill" id="trade-bar"></div></div>
+  </div>
+  <div class="buttons">
+    <button class="tap-btn trade-btn" id="btn-trade"><span class="btn-label">Took a trade</span><span class="btn-pts">+2 PTS</span></button>
+    <button class="tap-btn hold-btn" id="btn-notrade"><span class="btn-label">No-trade day</span><span class="btn-pts">+3 PTS</span></button>
+  </div>
+  <button class="action-btn full" id="btn-undo-trade">↩ undo last trading</button>
 
   <div class="divider"></div>
 
@@ -383,7 +368,6 @@
     <div class="log-heading">Today's log</div>
     <div class="log-list" id="log-list"></div>
   </div>
-
   <div class="actions">
     <button class="action-btn" id="btn-export">↓ export backup</button>
     <button class="action-btn" id="btn-import">↑ import backup</button>
@@ -396,24 +380,23 @@
 
 <script>
 const KEY = 'tdf_v2';
-
 const PTS = { try: 1, do: 2, fail: 4 };
+const TRADE_PTS = { trade: 2, notrade: 3 };
 
-function today() {
-  return new Date().toLocaleDateString('en-CA');
-}
-function yesterday() {
-  return new Date(Date.now() - 86400000).toLocaleDateString('en-CA');
-}
+function today() { return new Date().toLocaleDateString('en-CA'); }
+function yesterday() { return new Date(Date.now() - 86400000).toLocaleDateString('en-CA'); }
 
 function fresh() {
   return {
     entries: [],
     stockEntries: [],
+    tradeEntries: [],
     best: { pts: 0, date: null },
     stockBest: { count: 0, date: null },
+    tradeBest: { pts: 0, date: null },
     streak: 0, lastDate: null,
-    stockStreak: 0, stockLastDate: null
+    stockStreak: 0, stockLastDate: null,
+    tradeStreak: 0, tradeLastDate: null
   };
 }
 
@@ -425,29 +408,25 @@ function load() {
       const parsed = JSON.parse(r);
       return Object.assign(base, parsed, {
         best: Object.assign(base.best, parsed.best || {}),
-        stockBest: Object.assign(base.stockBest, parsed.stockBest || {})
+        stockBest: Object.assign(base.stockBest, parsed.stockBest || {}),
+        tradeBest: Object.assign(base.tradeBest, parsed.tradeBest || {})
       });
     }
   } catch (e) {}
   return base;
 }
 
-function save(d) {
-  try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
-}
+function save(d) { try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {} }
 
 function entriesToday(arr) {
   const t = today();
-  return arr.filter(e => e.date === t);
+  return arr.filter(function (e) { return e.date === t; });
 }
-function taskPtsToday(d) {
-  return entriesToday(d.entries).reduce((s, e) => s + e.pts, 0);
-}
-function stockToday(d) {
-  return entriesToday(d.stockEntries).length;
-}
+function taskPtsToday(d) { return entriesToday(d.entries).reduce(function (s, e) { return s + e.pts; }, 0); }
+function stockToday(d) { return entriesToday(d.stockEntries).length; }
+function tradePtsToday(d) { return entriesToday(d.tradeEntries).reduce(function (s, e) { return s + e.pts; }, 0); }
+function hasNoTradeToday(d) { return entriesToday(d.tradeEntries).some(function (e) { return e.type === 'notrade'; }); }
 
-// Streak bumps once per day on the first action of that kind.
 function bumpStreak(d, lastKey, streakKey) {
   const t = today();
   if (d[lastKey] !== t) {
@@ -462,7 +441,6 @@ function pct(now, best) {
   if (best <= 0) return now > 0 ? 100 : 0;
   return Math.min(100, Math.round((now / best) * 100));
 }
-
 function paceMsg(now, best, unit) {
   if (best <= 0) return now > 0 ? 'first record in the books' : 'set your first record';
   if (now > best) return '★ new best — keep going';
@@ -472,7 +450,6 @@ function paceMsg(now, best, unit) {
 
 function render() {
   const d = load();
-  const t = today();
 
   document.getElementById('today-date').textContent =
     new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
@@ -482,8 +459,7 @@ function render() {
   document.getElementById('today-pts').textContent = tp;
   document.getElementById('best-pts').textContent = d.best.pts;
   document.getElementById('best-date').textContent = d.best.date
-    ? new Date(d.best.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-    : '—';
+    ? new Date(d.best.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—';
   document.getElementById('streak-val').textContent = d.streak || 0;
   document.getElementById('task-total').textContent = d.entries.length + ' total';
   document.getElementById('task-pace-msg').textContent = paceMsg(tp, d.best.pts, 'pts');
@@ -496,30 +472,50 @@ function render() {
   document.getElementById('stock-count-inline').textContent = sc;
   document.getElementById('stock-best').textContent = d.stockBest.count;
   document.getElementById('stock-best-date').textContent = d.stockBest.date
-    ? new Date(d.stockBest.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-    : '—';
+    ? new Date(d.stockBest.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—';
   document.getElementById('stock-streak-val').textContent = d.stockStreak || 0;
   document.getElementById('stock-total').textContent = d.stockEntries.length + ' total';
   document.getElementById('stock-pace-msg').textContent = paceMsg(sc, d.stockBest.count, 'more');
   document.getElementById('stock-bar').style.width = pct(sc, d.stockBest.count) + '%';
   document.getElementById('stock-pace').classList.toggle('record', d.stockBest.count > 0 && sc >= d.stockBest.count);
 
+  // Trading
+  const rp = tradePtsToday(d);
+  document.getElementById('trade-today').textContent = rp;
+  document.getElementById('trade-best').textContent = d.tradeBest.pts;
+  document.getElementById('trade-best-date').textContent = d.tradeBest.date
+    ? new Date(d.tradeBest.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—';
+  document.getElementById('trade-streak-val').textContent = d.tradeStreak || 0;
+  document.getElementById('trade-total').textContent = d.tradeEntries.length + ' total';
+  document.getElementById('trade-pace-msg').textContent = paceMsg(rp, d.tradeBest.pts, 'pts');
+  document.getElementById('trade-bar').style.width = pct(rp, d.tradeBest.pts) + '%';
+  document.getElementById('trade-pace').classList.toggle('record', d.tradeBest.pts > 0 && rp >= d.tradeBest.pts);
+
   // Combined log
   const items = [];
-  entriesToday(d.entries).forEach(e => items.push({ kind: e.type, label: e.type, meta: '+' + e.pts + ' pt' + (e.pts > 1 ? 's' : ''), ts: e.ts }));
-  entriesToday(d.stockEntries).forEach(e => items.push({ kind: 'stock', label: 'sim', meta: 'simulation', ts: e.ts }));
-  items.sort((a, b) => new Date(b.ts) - new Date(a.ts));
+  entriesToday(d.entries).forEach(function (e) {
+    items.push({ kind: e.type, label: e.type, meta: '+' + e.pts + ' pt' + (e.pts > 1 ? 's' : ''), ts: e.ts });
+  });
+  entriesToday(d.stockEntries).forEach(function (e) {
+    items.push({ kind: 'stock', label: 'sim', meta: 'simulation', ts: e.ts });
+  });
+  entriesToday(d.tradeEntries).forEach(function (e) {
+    items.push({
+      kind: e.type === 'notrade' ? 'hold' : 'trade',
+      label: e.type === 'notrade' ? 'no-trade' : 'trade',
+      meta: '+' + e.pts + ' pts', ts: e.ts
+    });
+  });
+  items.sort(function (a, b) { return new Date(b.ts) - new Date(a.ts); });
 
   const listEl = document.getElementById('log-list');
   if (!items.length) {
     listEl.innerHTML = '<div class="log-empty">nothing logged yet today</div>';
   } else {
-    listEl.innerHTML = items.map(e => {
+    listEl.innerHTML = items.map(function (e) {
       const time = new Date(e.ts).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-      return '<div class="log-item">' +
-        '<span class="log-type t-' + e.kind + '">' + e.label + '</span>' +
-        '<span class="log-right"><span>' + e.meta + '</span><span>' + time + '</span></span>' +
-        '</div>';
+      return '<div class="log-item"><span class="log-type t-' + e.kind + '">' + e.label +
+        '</span><span class="log-right"><span>' + e.meta + '</span><span>' + time + '</span></span></div>';
     }).join('');
   }
 }
@@ -529,26 +525,18 @@ function toast(msg, isRecord) {
   el.textContent = msg;
   el.classList.toggle('record', !!isRecord);
   el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 1800);
+  setTimeout(function () { el.classList.remove('show'); }, 1800);
 }
-
-function flash(btn, cls) {
-  btn.classList.add(cls);
-  setTimeout(() => btn.classList.remove(cls), 150);
-}
+function flash(btn, cls) { btn.classList.add(cls); setTimeout(function () { btn.classList.remove(cls); }, 150); }
 
 function logTask(type, btn, flashClass) {
-  const d = load();
-  const t = today();
-  const pts = PTS[type];
-  d.entries.push({ type, pts, date: t, ts: new Date().toISOString() });
+  const d = load(); const t = today(); const pts = PTS[type];
+  d.entries.push({ type: type, pts: pts, date: t, ts: new Date().toISOString() });
   bumpStreak(d, 'lastDate', 'streak');
   const tp = taskPtsToday(d);
   let record = false;
   if (tp > d.best.pts) { d.best = { pts: tp, date: t }; record = d.best.pts > pts; }
-  save(d);
-  render();
-  flash(btn, flashClass);
+  save(d); render(); flash(btn, flashClass);
   if (record) toast('★ new best day — ' + tp + ' pts', true);
   else toast('+' + pts + ' point' + (pts > 1 ? 's' : ''));
 }
@@ -558,45 +546,55 @@ document.getElementById('btn-do').addEventListener('click', function () { logTas
 document.getElementById('btn-fail').addEventListener('click', function () { logTask('fail', this, 'flash-fail'); });
 
 document.getElementById('btn-stock').addEventListener('click', function () {
-  const d = load();
-  const t = today();
+  const d = load(); const t = today();
   d.stockEntries.push({ date: t, ts: new Date().toISOString() });
   bumpStreak(d, 'stockLastDate', 'stockStreak');
   const sc = stockToday(d);
   let record = false;
   if (sc > d.stockBest.count) { d.stockBest = { count: sc, date: t }; record = sc > 1; }
-  save(d);
-  render();
-  flash(this, 'flash-stock');
+  save(d); render(); flash(this, 'flash-stock');
   if (record) toast('★ new best — ' + sc + ' sims today', true);
   else toast('sim #' + sc + ' logged');
 });
 
+function logTrade(type, btn, flashClass) {
+  const d = load(); const t = today(); const pts = TRADE_PTS[type];
+  if (type === 'notrade' && hasNoTradeToday(d)) { toast('no-trade day already logged'); return; }
+  d.tradeEntries.push({ type: type, pts: pts, date: t, ts: new Date().toISOString() });
+  bumpStreak(d, 'tradeLastDate', 'tradeStreak');
+  const rp = tradePtsToday(d);
+  let record = false;
+  if (rp > d.tradeBest.pts) { d.tradeBest = { pts: rp, date: t }; record = d.tradeBest.pts > pts; }
+  save(d); render(); flash(btn, flashClass);
+  if (record) toast('★ new best trading day — ' + rp + ' pts', true);
+  else if (type === 'notrade') toast('held — +3 for discipline');
+  else toast('trade logged — +2');
+}
+
+document.getElementById('btn-trade').addEventListener('click', function () { logTrade('trade', this, 'flash-trade'); });
+document.getElementById('btn-notrade').addEventListener('click', function () { logTrade('notrade', this, 'flash-hold'); });
+
 function undoFrom(arrKey, recomputeBest) {
-  const d = load();
-  const t = today();
-  const arr = d[arrKey];
-  const idxs = arr.reduce((a, e, i) => { if (e.date === t) a.push(i); return a; }, []);
-  if (!idxs.length) { toast('nothing to undo today'); return; }
+  const d = load(); const t = today(); const arr = d[arrKey];
+  const idxs = arr.reduce(function (a, e, i) { if (e.date === t) a.push(i); return a; }, []);
+  if (!idxs.length) { toast('nothing to undo today'); return null; }
   const removed = arr.splice(idxs[idxs.length - 1], 1)[0];
   recomputeBest(d, t);
-  save(d);
-  render();
+  save(d); render();
   return removed;
 }
 
 document.getElementById('btn-undo-task').addEventListener('click', function () {
-  const removed = undoFrom('entries', (d, t) => {
-    if (d.best.date === t) d.best.pts = taskPtsToday(d);
-  });
+  const removed = undoFrom('entries', function (d, t) { if (d.best.date === t) d.best.pts = taskPtsToday(d); });
   if (removed) toast('undid ' + removed.type + ' (−' + removed.pts + ' pt' + (removed.pts > 1 ? 's' : '') + ')');
 });
-
 document.getElementById('btn-undo-stock').addEventListener('click', function () {
-  const removed = undoFrom('stockEntries', (d, t) => {
-    if (d.stockBest.date === t) d.stockBest.count = stockToday(d);
-  });
+  const removed = undoFrom('stockEntries', function (d, t) { if (d.stockBest.date === t) d.stockBest.count = stockToday(d); });
   if (removed) toast('undid 1 simulation');
+});
+document.getElementById('btn-undo-trade').addEventListener('click', function () {
+  const removed = undoFrom('tradeEntries', function (d, t) { if (d.tradeBest.date === t) d.tradeBest.pts = tradePtsToday(d); });
+  if (removed) toast('undid ' + (removed.type === 'notrade' ? 'no-trade day' : 'trade') + ' (−' + removed.pts + ' pts)');
 });
 
 document.getElementById('btn-export').addEventListener('click', function () {
@@ -604,42 +602,29 @@ document.getElementById('btn-export').addEventListener('click', function () {
   const blob = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url;
-  a.download = 'tdf_tracker_' + today() + '.json';
-  a.click();
+  a.href = url; a.download = 'tdf_tracker_' + today() + '.json'; a.click();
   URL.revokeObjectURL(url);
   toast('backup exported');
 });
-
-document.getElementById('btn-import').addEventListener('click', function () {
-  document.getElementById('import-file').click();
-});
+document.getElementById('btn-import').addEventListener('click', function () { document.getElementById('import-file').click(); });
 document.getElementById('import-file').addEventListener('change', function (ev) {
-  const file = ev.target.files[0];
-  if (!file) return;
+  const file = ev.target.files[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = function () {
     try {
       const parsed = JSON.parse(reader.result);
       if (!Array.isArray(parsed.entries)) throw new Error('bad file');
       if (!confirm('Replace all current data with this backup? This cannot be undone.')) return;
-      save(Object.assign(fresh(), parsed));
-      render();
-      toast('backup imported');
-    } catch (e) {
-      toast('could not read that file');
-    }
+      save(Object.assign(fresh(), parsed)); render(); toast('backup imported');
+    } catch (e) { toast('could not read that file'); }
   };
-  reader.readAsText(file);
-  ev.target.value = '';
+  reader.readAsText(file); ev.target.value = '';
 });
 
 render();
 
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function () {
-    navigator.serviceWorker.register('sw.js').catch(function () {});
-  });
+  window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
 }
 </script>
 </body>

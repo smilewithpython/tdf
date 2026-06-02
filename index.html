@@ -256,6 +256,144 @@
     background: linear-gradient(90deg, #1a3d2b, #3d3416);
     border-color: rgba(251,191,36,0.4);
   }
+
+  /* ── CAT REWARD ── */
+  --cat: #ff9f3f;
+
+  .cat-section { display: flex; flex-direction: column; gap: 10px; }
+
+  .tap-btn.cat-btn .btn-label { color: var(--cat); }
+  .tap-btn.flash-cat { background: #3d2610; }
+
+  .tap-btn.cat-btn.locked {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .tap-btn.cat-btn.locked .btn-label { color: var(--ink3); }
+
+  .cat-timer-bar {
+    height: 4px;
+    border-radius: 100px;
+    background: rgba(240,235,227,0.07);
+    overflow: hidden;
+    display: none;
+  }
+  .cat-timer-bar.active { display: block; }
+  .cat-timer-fill {
+    height: 100%;
+    border-radius: 100px;
+    background: var(--cat);
+    width: 100%;
+    transition: width 1s linear;
+  }
+
+  /* ── CAT OVERLAY ── */
+  .cat-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: #000;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .cat-overlay.open { display: flex; }
+
+  .cat-media-wrap {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    position: relative;
+  }
+  .cat-media-wrap img,
+  .cat-media-wrap video {
+    max-width: 100%; max-height: 88vh;
+    object-fit: contain;
+  }
+
+  .cat-overlay-top {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    padding: 44px 16px 12px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, transparent 100%);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 2;
+  }
+
+  .cat-countdown {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.7);
+    background: rgba(0,0,0,0.4);
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 0.5px solid rgba(255,255,255,0.15);
+  }
+
+  .cat-close-btn {
+    background: rgba(255,255,255,0.12);
+    border: 0.5px solid rgba(255,255,255,0.2);
+    border-radius: 50%;
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 16px; color: rgba(255,255,255,0.8);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .cat-overlay-bottom {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 12px 16px 36px;
+    background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 100%);
+    z-index: 2;
+  }
+
+  .cat-overlay-bottom-row { display: flex; gap: 8px; }
+
+  .cat-next-btn {
+    flex: 1;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(8px);
+    border: 0.5px solid rgba(255,255,255,0.18);
+    border-radius: 12px;
+    color: rgba(255,255,255,0.85);
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    padding: 14px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.1s;
+  }
+  .cat-next-btn:active { background: rgba(255,255,255,0.2); }
+
+  .cat-progress-bar {
+    height: 3px;
+    border-radius: 100px;
+    background: rgba(255,255,255,0.12);
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  .cat-progress-fill {
+    height: 100%;
+    border-radius: 100px;
+    background: var(--cat);
+    width: 100%;
+    transition: width 1s linear;
+  }
+
+  .cat-no-files {
+    color: rgba(255,255,255,0.5);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    text-align: center;
+    line-height: 2;
+    padding: 40px 20px;
+  }
 </style>
 </head>
 <body>
@@ -363,6 +501,25 @@
 
   <div class="divider"></div>
 
+  <!-- ============ CAT REWARD ============ -->
+  <div class="cat-section">
+    <div class="sec-head">
+      <span class="sec-title">Traded with structure</span>
+      <span class="sec-sub" id="cat-status-label">honor system</span>
+    </div>
+    <button class="tap-btn cat-btn" id="btn-cat">
+      <span class="btn-label">🐾 Claim cat reward</span>
+      <span class="btn-pts" id="cat-btn-meta">5 MIN</span>
+    </button>
+    <div class="cat-timer-bar" id="cat-timer-bar">
+      <div class="cat-timer-fill" id="cat-timer-fill"></div>
+    </div>
+    <button class="action-btn full" id="btn-cat-folder">📁 select cat folder</button>
+  </div>
+  <input type="file" id="cat-folder-input" webkitdirectory multiple accept="image/*,video/*" style="display:none">
+
+  <div class="divider"></div>
+
   <!-- ============ LOG + DATA ============ -->
   <div>
     <div class="log-heading">Today's log</div>
@@ -374,6 +531,27 @@
   </div>
   <input type="file" id="import-file" accept="application/json" style="display:none">
 
+</div>
+
+<!-- ── CAT OVERLAY ── -->
+<div class="cat-overlay" id="cat-overlay">
+  <div class="cat-media-wrap" id="cat-media-wrap">
+    <div class="cat-no-files" id="cat-no-files">
+      🐱<br>No cat folder selected yet.<br>Scroll down and tap <em>select cat folder</em>.
+    </div>
+  </div>
+  <div class="cat-overlay-top">
+    <div class="cat-countdown" id="cat-countdown">5:00</div>
+    <div class="cat-close-btn" id="cat-close-btn">✕</div>
+  </div>
+  <div class="cat-overlay-bottom">
+    <div class="cat-progress-bar">
+      <div class="cat-progress-fill" id="cat-progress-fill"></div>
+    </div>
+    <div class="cat-overlay-bottom-row">
+      <button class="cat-next-btn" id="cat-next-btn">↻ next</button>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -622,6 +800,189 @@ document.getElementById('import-file').addEventListener('change', function (ev) 
 });
 
 render();
+
+// ── CAT REWARD ─────────────────────────────────────────────────────────────
+(function () {
+  var CAT_KEY   = 'tws_cat';
+  var LOCKOUT   = 5 * 60; // seconds
+  var catFiles  = [];
+  var catTimer  = null;
+  var catSecsLeft = 0;
+
+  var btn       = document.getElementById('btn-cat');
+  var btnMeta   = document.getElementById('cat-btn-meta');
+  var statusLbl = document.getElementById('cat-status-label');
+  var timerBar  = document.getElementById('cat-timer-bar');
+  var timerFill = document.getElementById('cat-timer-fill');
+  var overlay   = document.getElementById('cat-overlay');
+  var mediaWrap = document.getElementById('cat-media-wrap');
+  var noFiles   = document.getElementById('cat-no-files');
+  var countdown = document.getElementById('cat-countdown');
+  var closeBtn  = document.getElementById('cat-close-btn');
+  var nextBtn   = document.getElementById('cat-next-btn');
+  var progFill  = document.getElementById('cat-progress-fill');
+  var folderBtn = document.getElementById('btn-cat-folder');
+  var folderInp = document.getElementById('cat-folder-input');
+
+  // ── persist lockout across page reloads ──
+  function loadCatState() {
+    try { return JSON.parse(localStorage.getItem(CAT_KEY)) || {}; } catch(e) { return {}; }
+  }
+  function saveCatState(o) {
+    try { localStorage.setItem(CAT_KEY, JSON.stringify(o)); } catch(e) {}
+  }
+
+  function fmtTime(s) {
+    var m = Math.floor(s / 60);
+    var sec = s % 60;
+    return m + ':' + (sec < 10 ? '0' : '') + sec;
+  }
+
+  function updateButtonState() {
+    var cs = loadCatState();
+    var now = Math.floor(Date.now() / 1000);
+    var remaining = cs.unlockedUntil ? cs.unlockedUntil - now : 0;
+
+    if (remaining > 0) {
+      // Currently in an active reward session — show time left on button
+      btn.classList.remove('locked');
+      btnMeta.textContent = fmtTime(remaining);
+      statusLbl.textContent = 'session active';
+      timerBar.classList.add('active');
+      var pct = (remaining / LOCKOUT) * 100;
+      timerFill.style.width = pct + '%';
+    } else if (cs.lockedUntil && cs.lockedUntil > now) {
+      // In lockout — button locked
+      btn.classList.add('locked');
+      var lockLeft = cs.lockedUntil - now;
+      btnMeta.textContent = 'locked';
+      statusLbl.textContent = 'locked · ' + fmtTime(lockLeft);
+      timerBar.classList.add('active');
+      timerFill.style.width = ((lockLeft / LOCKOUT) * 100) + '%';
+    } else {
+      // Ready
+      btn.classList.remove('locked');
+      btnMeta.textContent = '5 MIN';
+      statusLbl.textContent = 'honor system';
+      timerBar.classList.remove('active');
+      timerFill.style.width = '100%';
+    }
+  }
+
+  // ── countdown tick while overlay is open ──
+  function startOverlayTimer() {
+    clearInterval(catTimer);
+    var cs = loadCatState();
+    var now = Math.floor(Date.now() / 1000);
+    catSecsLeft = Math.max(0, cs.unlockedUntil - now);
+
+    catTimer = setInterval(function () {
+      catSecsLeft--;
+      var pct = Math.max(0, (catSecsLeft / LOCKOUT) * 100);
+      countdown.textContent = fmtTime(Math.max(0, catSecsLeft));
+      progFill.style.width = pct + '%';
+      updateButtonState();
+
+      if (catSecsLeft <= 0) {
+        clearInterval(catTimer);
+        closeOverlay();
+        toast('time\'s up — next reward after your next structured trade');
+      }
+    }, 1000);
+  }
+
+  // ── open overlay ──
+  function openOverlay() {
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    countdown.textContent = fmtTime(LOCKOUT);
+    progFill.style.width = '100%';
+    showRandomMedia();
+    startOverlayTimer();
+    if (navigator.vibrate) navigator.vibrate(15);
+  }
+
+  function closeOverlay() {
+    clearInterval(catTimer);
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+    // Revoke any blob URLs
+    var el = mediaWrap.querySelector('img, video');
+    if (el && el.src.startsWith('blob:')) URL.revokeObjectURL(el.src);
+    updateButtonState();
+  }
+
+  // ── media display ──
+  function showRandomMedia() {
+    // Remove previous media but keep no-files msg hidden
+    var prev = mediaWrap.querySelector('img, video');
+    if (prev) { if (prev.src.startsWith('blob:')) URL.revokeObjectURL(prev.src); prev.remove(); }
+
+    if (!catFiles.length) {
+      noFiles.style.display = '';
+      return;
+    }
+    noFiles.style.display = 'none';
+
+    var file = catFiles[Math.floor(Math.random() * catFiles.length)];
+    var url  = URL.createObjectURL(file);
+    var el;
+
+    if (file.type.startsWith('video/')) {
+      el = document.createElement('video');
+      el.autoplay = true; el.loop = true; el.playsInline = true; el.controls = false;
+    } else {
+      el = document.createElement('img');
+      el.alt = 'cat';
+    }
+    el.src = url;
+    mediaWrap.insertBefore(el, noFiles);
+  }
+
+  // ── claim button ──
+  btn.addEventListener('click', function () {
+    var cs = loadCatState();
+    var now = Math.floor(Date.now() / 1000);
+
+    // Blocked during lockout
+    if (cs.lockedUntil && cs.lockedUntil > now) {
+      toast('locked · ' + fmtTime(cs.lockedUntil - now) + ' remaining');
+      return;
+    }
+
+    // Set session end + lockout
+    var newCs = {
+      unlockedUntil: now + LOCKOUT,
+      lockedUntil:   now + LOCKOUT   // lockout kicks in once session ends
+    };
+    saveCatState(newCs);
+    updateButtonState();
+    openOverlay();
+  });
+
+  closeBtn.addEventListener('click', closeOverlay);
+  nextBtn.addEventListener('click', showRandomMedia);
+
+  // ── folder picker ──
+  folderBtn.addEventListener('click', function () { folderInp.click(); });
+  folderInp.addEventListener('change', function (e) {
+    catFiles = Array.from(e.target.files).filter(function (f) {
+      return f.type.startsWith('image/') || f.type.startsWith('video/');
+    });
+    if (catFiles.length) {
+      folderBtn.textContent = '📁 ' + catFiles.length + ' cat files loaded';
+      toast(catFiles.length + ' cat files ready');
+    } else {
+      folderBtn.textContent = '📁 select cat folder';
+      toast('no image/video files found');
+    }
+    e.target.value = '';
+  });
+
+  // ── poll every second to keep button state fresh ──
+  updateButtonState();
+  setInterval(updateButtonState, 1000);
+})();
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });

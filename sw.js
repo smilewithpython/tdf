@@ -1,4 +1,4 @@
-const CACHE = 'tdf-v3';
+const CACHE = 'tdf-v6';
 const ASSETS = [
   'index.html',
   'manifest.json',
@@ -23,20 +23,21 @@ self.addEventListener('activate', function (e) {
   );
 });
 
-// Cache-first, then network. Network responses are cached for next time,
-// so the Google Fonts load once online and then work offline too.
+// NETWORK-FIRST for the app files. Always try the network first so a fresh
+// push shows up immediately; fall back to cache only when offline.
 self.addEventListener('fetch', function (e) {
   if (e.request.method !== 'GET') return;
   e.respondWith(
-    caches.match(e.request).then(function (cached) {
-      const net = fetch(e.request).then(function (res) {
-        if (res && res.status === 200) {
-          const copy = res.clone();
-          caches.open(CACHE).then(function (c) { c.put(e.request, copy); });
-        }
-        return res;
-      }).catch(function () { return cached || caches.match('index.html'); });
-      return cached || net;
+    fetch(e.request).then(function (res) {
+      if (res && res.status === 200) {
+        const copy = res.clone();
+        caches.open(CACHE).then(function (c) { c.put(e.request, copy); });
+      }
+      return res;
+    }).catch(function () {
+      return caches.match(e.request).then(function (cached) {
+        return cached || caches.match('index.html');
+      });
     })
   );
 });

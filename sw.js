@@ -1,4 +1,4 @@
-const CACHE = 'tdf-v3';
+const CACHE = 'tdf-v4';
 const ASSETS = [
   'index.html',
   'manifest.json',

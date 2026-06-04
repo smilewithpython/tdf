@@ -465,6 +465,18 @@
     <span class="btn-label">+ Simulation</span>
     <span class="stock-count" id="stock-count-inline">0</span>
   </button>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+    <div class="stat-card">
+      <div class="stat-label">Best day</div>
+      <div class="stat-num" style="font-size:2rem;" id="stock-best-day-btn">0</div>
+      <div class="stat-meta" id="stock-best-day-btn-date">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">All-time total</div>
+      <div class="stat-num" style="font-size:2rem;color:var(--stock);" id="stock-alltime">0</div>
+      <div class="stat-meta">simulations</div>
+    </div>
+  </div>
   <button class="action-btn full" id="btn-undo-stock">↩ undo last sim</button>
 
   <div class="divider"></div>
@@ -656,6 +668,11 @@ function render() {
   document.getElementById('stock-pace-msg').textContent = paceMsg(sc, d.stockBest.count, 'more');
   document.getElementById('stock-bar').style.width = pct(sc, d.stockBest.count) + '%';
   document.getElementById('stock-pace').classList.toggle('record', d.stockBest.count > 0 && sc >= d.stockBest.count);
+  // Button-area counters
+  document.getElementById('stock-best-day-btn').textContent = d.stockBest.count || 0;
+  document.getElementById('stock-best-day-btn-date').textContent = d.stockBest.date
+    ? new Date(d.stockBest.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—';
+  document.getElementById('stock-alltime').textContent = d.stockEntries.length;
 
   // Trading
   const rp = tradePtsToday(d);

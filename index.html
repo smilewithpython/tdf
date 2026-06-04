@@ -399,9 +399,10 @@
 <body>
 <div class="app">
 
-  <div class="header">
+  <div class="header" style="position:relative;">
     <h1>Try · Do · Fail</h1>
     <p class="sub" id="today-date">daily points tracker</p>
+    <button id="btn-settings-open" style="position:absolute;top:0;right:0;background:none;border:0.5px solid var(--border);border-radius:8px;color:var(--ink3);font-size:11px;letter-spacing:0.06em;padding:5px 10px;cursor:pointer;font-family:'DM Mono',monospace;">⚙ timers</button>
   </div>
 
   <!-- ============ TASKS ============ -->
@@ -479,6 +480,23 @@
   </div>
   <button class="action-btn full" id="btn-undo-stock">↩ undo last sim</button>
 
+  <!-- ============ OPEN SIMULATION CAT REWARD ============ -->
+  <div class="cat-section">
+    <div class="sec-head">
+      <span class="sec-title">Open simulation</span>
+      <span class="sec-sub" id="sim-status-label">teaser · 0:25</span>
+    </div>
+    <button class="tap-btn cat-btn" id="btn-sim-cat">
+      <span class="btn-label">🐾 Claim cat reward</span>
+      <span class="btn-pts" id="sim-btn-meta">0:25</span>
+    </button>
+    <div class="cat-timer-bar" id="sim-timer-bar">
+      <div class="cat-timer-fill" style="background:var(--stock);" id="sim-timer-fill"></div>
+    </div>
+    <button class="action-btn full" id="btn-sim-folder">📁 choose cat folder</button>
+  </div>
+  <input type="file" id="sim-folder-input" webkitdirectory multiple accept="image/*,video/*" style="display:none">
+
   <div class="divider"></div>
 
   <!-- ============ TRADING ============ -->
@@ -521,12 +539,12 @@
     </div>
     <button class="tap-btn cat-btn" id="btn-cat">
       <span class="btn-label">🐾 Claim cat reward</span>
-      <span class="btn-pts" id="cat-btn-meta">5 MIN</span>
+      <span class="btn-pts" id="cat-btn-meta">2:30</span>
     </button>
     <div class="cat-timer-bar" id="cat-timer-bar">
       <div class="cat-timer-fill" id="cat-timer-fill"></div>
     </div>
-    <button class="action-btn full" id="btn-cat-folder">📁 select cat folder</button>
+    <button class="action-btn full" id="btn-cat-folder">📁 choose cat folder</button>
   </div>
   <input type="file" id="cat-folder-input" webkitdirectory multiple accept="image/*,video/*" style="display:none">
 
@@ -543,6 +561,56 @@
   </div>
   <input type="file" id="import-file" accept="application/json" style="display:none">
 
+</div>
+
+<!-- ── SETTINGS PANEL ── -->
+<div id="settings-panel" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
+  <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:1.5rem;width:88%;max-width:360px;display:flex;flex-direction:column;gap:1rem;">
+    <div style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--ink);">Timer Settings</div>
+    <div style="font-size:11px;color:var(--ink3);line-height:1.7;">Changes take effect on next claim.</div>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <label style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);">🐾 Traded with structure</label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input id="set-trade-min" type="number" min="0" max="60" style="width:60px;background:var(--bg);border:0.5px solid var(--border);border-radius:8px;color:var(--ink);font-family:'DM Mono',monospace;font-size:13px;padding:8px 10px;text-align:center;">
+        <span style="font-size:11px;color:var(--ink3);">min</span>
+        <input id="set-trade-sec" type="number" min="0" max="59" style="width:60px;background:var(--bg);border:0.5px solid var(--border);border-radius:8px;color:var(--ink);font-family:'DM Mono',monospace;font-size:13px;padding:8px 10px;text-align:center;">
+        <span style="font-size:11px;color:var(--ink3);">sec</span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <label style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);">📈 Open simulation teaser</label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input id="set-sim-min" type="number" min="0" max="60" style="width:60px;background:var(--bg);border:0.5px solid var(--border);border-radius:8px;color:var(--ink);font-family:'DM Mono',monospace;font-size:13px;padding:8px 10px;text-align:center;">
+        <span style="font-size:11px;color:var(--ink3);">min</span>
+        <input id="set-sim-sec" type="number" min="0" max="59" style="width:60px;background:var(--bg);border:0.5px solid var(--border);border-radius:8px;color:var(--ink);font-family:'DM Mono',monospace;font-size:13px;padding:8px 10px;text-align:center;">
+        <span style="font-size:11px;color:var(--ink3);">sec</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:4px;">
+      <button id="btn-settings-save" style="flex:1;background:var(--trade);border:none;border-radius:10px;color:#fff;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.06em;padding:12px;cursor:pointer;">Save</button>
+      <button id="btn-settings-cancel" style="flex:1;background:none;border:0.5px solid var(--border);border-radius:10px;color:var(--ink3);font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.06em;padding:12px;cursor:pointer;">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── SIM TEASER OVERLAY ── -->
+<div class="cat-overlay" id="sim-overlay">
+  <div class="cat-media-wrap" id="sim-media-wrap">
+    <div class="cat-no-files" id="sim-no-files">
+      🐱<br>No cat folder selected yet.<br>Tap <em>choose cat folder</em> below.
+    </div>
+  </div>
+  <div class="cat-overlay-top">
+    <div class="cat-countdown" id="sim-countdown" style="background:rgba(251,191,36,0.2);border-color:rgba(251,191,36,0.4);color:var(--stock);">0:25</div>
+    <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;color:rgba(255,255,255,0.4);text-transform:uppercase;align-self:center;">teaser</div>
+    <div class="cat-close-btn" id="sim-close-btn">✕</div>
+  </div>
+  <div class="cat-overlay-bottom">
+    <div class="cat-progress-bar"><div class="cat-progress-fill" id="sim-progress-fill" style="background:var(--stock);"></div></div>
+    <div class="cat-overlay-bottom-row">
+      <button class="cat-next-btn" id="sim-next-btn">↻ next</button>
+    </div>
+  </div>
 </div>
 
 <!-- ── CAT OVERLAY ── -->
@@ -668,11 +736,6 @@ function render() {
   document.getElementById('stock-pace-msg').textContent = paceMsg(sc, d.stockBest.count, 'more');
   document.getElementById('stock-bar').style.width = pct(sc, d.stockBest.count) + '%';
   document.getElementById('stock-pace').classList.toggle('record', d.stockBest.count > 0 && sc >= d.stockBest.count);
-  // Button-area counters
-  document.getElementById('stock-best-day-btn').textContent = d.stockBest.count || 0;
-  document.getElementById('stock-best-day-btn-date').textContent = d.stockBest.date
-    ? new Date(d.stockBest.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—';
-  document.getElementById('stock-alltime').textContent = d.stockEntries.length;
 
   // Trading
   const rp = tradePtsToday(d);
@@ -818,188 +881,328 @@ document.getElementById('import-file').addEventListener('change', function (ev) 
 
 render();
 
-// ── CAT REWARD ─────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+// TIMER SETTINGS
+// ══════════════════════════════════════════════════════════════════
+var SETTINGS_KEY = 'tdf_timers';
+
+function loadTimers() {
+  try { return JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {}; } catch(e) { return {}; }
+}
+function saveTimers(o) {
+  try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(o)); } catch(e) {}
+}
+function getTradeSeconds() {
+  var t = loadTimers();
+  // default 2:30
+  return ((t.tradeMin !== undefined ? t.tradeMin : 2) * 60) + (t.tradeSec !== undefined ? t.tradeSec : 30);
+}
+function getSimSeconds() {
+  var t = loadTimers();
+  // default 0:25
+  return ((t.simMin !== undefined ? t.simMin : 0) * 60) + (t.simSec !== undefined ? t.simSec : 25);
+}
+
+function fmtTime(s) {
+  s = Math.max(0, s);
+  var m = Math.floor(s / 60);
+  var sec = s % 60;
+  return m + ':' + (sec < 10 ? '0' : '') + sec;
+}
+
+// Settings panel logic
+(function() {
+  var panel     = document.getElementById('settings-panel');
+  var btnOpen   = document.getElementById('btn-settings-open');
+  var btnSave   = document.getElementById('btn-settings-save');
+  var btnCancel = document.getElementById('btn-settings-cancel');
+  var inTMin = document.getElementById('set-trade-min');
+  var inTSec = document.getElementById('set-trade-sec');
+  var inSMin = document.getElementById('set-sim-min');
+  var inSSec = document.getElementById('set-sim-sec');
+
+  btnOpen.addEventListener('click', function() {
+    var total = getTradeSeconds();
+    inTMin.value = Math.floor(total / 60);
+    inTSec.value = total % 60;
+    var stotal = getSimSeconds();
+    inSMin.value = Math.floor(stotal / 60);
+    inSSec.value = stotal % 60;
+    panel.style.display = 'flex';
+  });
+  btnSave.addEventListener('click', function() {
+    saveTimers({
+      tradeMin: parseInt(inTMin.value) || 0,
+      tradeSec: parseInt(inTSec.value) || 0,
+      simMin:   parseInt(inSMin.value) || 0,
+      simSec:   parseInt(inSSec.value) || 0
+    });
+    panel.style.display = 'none';
+    refreshCatBtn();
+    refreshSimBtn();
+    toast('timers saved');
+  });
+  btnCancel.addEventListener('click', function() { panel.style.display = 'none'; });
+})();
+
+// ══════════════════════════════════════════════════════════════════
+// SHARED CAT FILES (one folder picker serves both overlays)
+// ══════════════════════════════════════════════════════════════════
+var catFiles = [];
+
+function showMediaIn(wrap, noFilesEl) {
+  var prev = wrap.querySelector('img, video');
+  if (prev) { if (prev.src && prev.src.startsWith('blob:')) URL.revokeObjectURL(prev.src); prev.remove(); }
+  if (!catFiles.length) { noFilesEl.style.display = ''; return; }
+  noFilesEl.style.display = 'none';
+  var file = catFiles[Math.floor(Math.random() * catFiles.length)];
+  var url  = URL.createObjectURL(file);
+  var el;
+  if (file.type.startsWith('video/')) {
+    el = document.createElement('video');
+    el.autoplay = true; el.loop = true; el.playsInline = true; el.controls = false;
+  } else {
+    el = document.createElement('img'); el.alt = 'cat';
+  }
+  el.src = url;
+  wrap.insertBefore(el, noFilesEl);
+}
+
+// ══════════════════════════════════════════════════════════════════
+// OVERLAY FACTORY — reusable timed cat viewer
+// ══════════════════════════════════════════════════════════════════
+function makeOverlay(cfg) {
+  var overlay   = document.getElementById(cfg.overlayId);
+  var mediaWrap = document.getElementById(cfg.mediaWrapId);
+  var noFiles   = document.getElementById(cfg.noFilesId);
+  var countdown = document.getElementById(cfg.countdownId);
+  var closeBtn  = document.getElementById(cfg.closeBtnId);
+  var nextBtn   = document.getElementById(cfg.nextBtnId);
+  var progFill  = document.getElementById(cfg.progFillId);
+  var timer     = null;
+  var secsLeft  = 0;
+
+  function close() {
+    clearInterval(timer);
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+    var el = mediaWrap.querySelector('img, video');
+    if (el && el.src && el.src.startsWith('blob:')) URL.revokeObjectURL(el.src);
+    if (cfg.onClose) cfg.onClose();
+  }
+
+  function open() {
+    var duration = cfg.getDuration();
+    secsLeft = duration;
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    countdown.textContent = fmtTime(secsLeft);
+    progFill.style.width = '100%';
+    showMediaIn(mediaWrap, noFiles);
+    if (navigator.vibrate) navigator.vibrate(15);
+    clearInterval(timer);
+    timer = setInterval(function() {
+      secsLeft--;
+      countdown.textContent = fmtTime(secsLeft);
+      progFill.style.width = Math.max(0, (secsLeft / duration) * 100) + '%';
+      if (secsLeft <= 0) { clearInterval(timer); close(); toast('time\'s up'); }
+    }, 1000);
+  }
+
+  closeBtn.addEventListener('click', close);
+  nextBtn.addEventListener('click', function() { showMediaIn(mediaWrap, noFiles); });
+
+  return { open: open, close: close };
+}
+
+// ══════════════════════════════════════════════════════════════════
+// OPEN SIMULATION — 25-second teaser (fires on every + Simulation tap)
+// ══════════════════════════════════════════════════════════════════
+var simOverlay = makeOverlay({
+  overlayId:   'sim-overlay',
+  mediaWrapId: 'sim-media-wrap',
+  noFilesId:   'sim-no-files',
+  countdownId: 'sim-countdown',
+  closeBtnId:  'sim-close-btn',
+  nextBtnId:   'sim-next-btn',
+  progFillId:  'sim-progress-fill',
+  getDuration: getSimSeconds,
+  onClose: function() { refreshSimBtn(); }
+});
+
+// Wire + Simulation button to also open the sim teaser
+(function() {
+  var origHandler = document.getElementById('btn-stock').onclick;
+  document.getElementById('btn-stock').addEventListener('click', function() {
+    simOverlay.open();
+  });
+})();
+
+// Sim cat reward button (standalone claim, same overlay)
+var simBtn      = document.getElementById('btn-sim-cat');
+var simBtnMeta  = document.getElementById('sim-btn-meta');
+var simStatusLbl = document.getElementById('sim-status-label');
+var simTimerBar  = document.getElementById('sim-timer-bar');
+var simTimerFill = document.getElementById('sim-timer-fill');
+var SIM_CAT_KEY  = 'tws_sim_cat';
+
+function loadSimCatState() { try { return JSON.parse(localStorage.getItem(SIM_CAT_KEY)) || {}; } catch(e) { return {}; } }
+function saveSimCatState(o) { try { localStorage.setItem(SIM_CAT_KEY, JSON.stringify(o)); } catch(e) {} }
+
+function refreshSimBtn() {
+  var cs  = loadSimCatState();
+  var now = Math.floor(Date.now() / 1000);
+  var dur = getSimSeconds();
+  var lockLeft = cs.lockedUntil ? cs.lockedUntil - now : 0;
+
+  if (lockLeft > 0) {
+    simBtn.classList.add('locked');
+    simBtnMeta.textContent = 'locked';
+    simStatusLbl.textContent = 'locked · ' + fmtTime(lockLeft);
+    simTimerBar.classList.add('active');
+    simTimerFill.style.width = ((lockLeft / dur) * 100) + '%';
+  } else {
+    simBtn.classList.remove('locked');
+    simBtnMeta.textContent = fmtTime(dur);
+    simStatusLbl.textContent = 'teaser · ' + fmtTime(dur);
+    simTimerBar.classList.remove('active');
+  }
+}
+
+simBtn.addEventListener('click', function() {
+  var cs  = loadSimCatState();
+  var now = Math.floor(Date.now() / 1000);
+  var dur = getSimSeconds();
+  if (cs.lockedUntil && cs.lockedUntil > now) {
+    toast('locked · ' + fmtTime(cs.lockedUntil - now) + ' remaining');
+    return;
+  }
+  saveSimCatState({ lockedUntil: now + dur });
+  refreshSimBtn();
+  simOverlay.open();
+});
+
+// Folder picker for sim section (shares catFiles)
+document.getElementById('btn-sim-folder').addEventListener('click', function() {
+  document.getElementById('sim-folder-input').click();
+});
+document.getElementById('sim-folder-input').addEventListener('change', function(e) {
+  catFiles = Array.from(e.target.files).filter(function(f) {
+    return f.type.startsWith('image/') || f.type.startsWith('video/');
+  });
+  this.parentElement.querySelector('#btn-sim-folder') && (document.getElementById('btn-sim-folder').textContent =
+    catFiles.length ? '📁 ' + catFiles.length + ' cat files loaded' : '📁 choose cat folder');
+  toast(catFiles.length ? catFiles.length + ' cat files ready' : 'no image/video files found');
+  // Also update the other folder button
+  var catFolderBtn = document.getElementById('btn-cat-folder');
+  if (catFolderBtn && catFiles.length) catFolderBtn.textContent = '📁 ' + catFiles.length + ' cat files loaded';
+  e.target.value = '';
+});
+
+refreshSimBtn();
+setInterval(refreshSimBtn, 1000);
+
+// ══════════════════════════════════════════════════════════════════
+// TRADED WITH STRUCTURE — 2:30 main reward
+// ══════════════════════════════════════════════════════════════════
 (function () {
   var CAT_KEY   = 'tws_cat';
-  var LOCKOUT   = 5 * 60; // seconds
-  var catFiles  = [];
-  var catTimer  = null;
-  var catSecsLeft = 0;
-
   var btn       = document.getElementById('btn-cat');
   var btnMeta   = document.getElementById('cat-btn-meta');
   var statusLbl = document.getElementById('cat-status-label');
   var timerBar  = document.getElementById('cat-timer-bar');
   var timerFill = document.getElementById('cat-timer-fill');
-  var overlay   = document.getElementById('cat-overlay');
-  var mediaWrap = document.getElementById('cat-media-wrap');
-  var noFiles   = document.getElementById('cat-no-files');
-  var countdown = document.getElementById('cat-countdown');
-  var closeBtn  = document.getElementById('cat-close-btn');
-  var nextBtn   = document.getElementById('cat-next-btn');
-  var progFill  = document.getElementById('cat-progress-fill');
   var folderBtn = document.getElementById('btn-cat-folder');
   var folderInp = document.getElementById('cat-folder-input');
 
-  // ── persist lockout across page reloads ──
-  function loadCatState() {
-    try { return JSON.parse(localStorage.getItem(CAT_KEY)) || {}; } catch(e) { return {}; }
-  }
-  function saveCatState(o) {
-    try { localStorage.setItem(CAT_KEY, JSON.stringify(o)); } catch(e) {}
-  }
+  var catOverlay = makeOverlay({
+    overlayId:   'cat-overlay',
+    mediaWrapId: 'cat-media-wrap',
+    noFilesId:   'cat-no-files',
+    countdownId: 'cat-countdown',
+    closeBtnId:  'cat-close-btn',
+    nextBtnId:   'cat-next-btn',
+    progFillId:  'cat-progress-fill',
+    getDuration: getTradeSeconds,
+    onClose: function() { refreshCatBtn(); }
+  });
 
-  function fmtTime(s) {
-    var m = Math.floor(s / 60);
-    var sec = s % 60;
-    return m + ':' + (sec < 10 ? '0' : '') + sec;
-  }
+  function loadCatState() { try { return JSON.parse(localStorage.getItem(CAT_KEY)) || {}; } catch(e) { return {}; } }
+  function saveCatState(o) { try { localStorage.setItem(CAT_KEY, JSON.stringify(o)); } catch(e) {} }
 
-  function updateButtonState() {
-    var cs = loadCatState();
+  function refreshCatBtn() {
+    var cs  = loadCatState();
     var now = Math.floor(Date.now() / 1000);
-    var remaining = cs.unlockedUntil ? cs.unlockedUntil - now : 0;
+    var dur = getTradeSeconds();
+    var lockLeft = cs.lockedUntil ? cs.lockedUntil - now : 0;
 
-    if (remaining > 0) {
-      // Currently in an active reward session — show time left on button
-      btn.classList.remove('locked');
-      btnMeta.textContent = fmtTime(remaining);
-      statusLbl.textContent = 'session active';
-      timerBar.classList.add('active');
-      var pct = (remaining / LOCKOUT) * 100;
-      timerFill.style.width = pct + '%';
-    } else if (cs.lockedUntil && cs.lockedUntil > now) {
-      // In lockout — button locked
+    if (lockLeft > 0) {
       btn.classList.add('locked');
-      var lockLeft = cs.lockedUntil - now;
       btnMeta.textContent = 'locked';
       statusLbl.textContent = 'locked · ' + fmtTime(lockLeft);
       timerBar.classList.add('active');
-      timerFill.style.width = ((lockLeft / LOCKOUT) * 100) + '%';
+      timerFill.style.width = ((lockLeft / dur) * 100) + '%';
     } else {
-      // Ready
       btn.classList.remove('locked');
-      btnMeta.textContent = '5 MIN';
+      btnMeta.textContent = fmtTime(dur);
       statusLbl.textContent = 'honor system';
       timerBar.classList.remove('active');
-      timerFill.style.width = '100%';
     }
   }
 
-  // ── countdown tick while overlay is open ──
-  function startOverlayTimer() {
-    clearInterval(catTimer);
-    var cs = loadCatState();
+  // expose so settings save can call it
+  window.refreshCatBtn = refreshCatBtn;
+
+  btn.addEventListener('click', function() {
+    var cs  = loadCatState();
     var now = Math.floor(Date.now() / 1000);
-    catSecsLeft = Math.max(0, cs.unlockedUntil - now);
-
-    catTimer = setInterval(function () {
-      catSecsLeft--;
-      var pct = Math.max(0, (catSecsLeft / LOCKOUT) * 100);
-      countdown.textContent = fmtTime(Math.max(0, catSecsLeft));
-      progFill.style.width = pct + '%';
-      updateButtonState();
-
-      if (catSecsLeft <= 0) {
-        clearInterval(catTimer);
-        closeOverlay();
-        toast('time\'s up — next reward after your next structured trade');
-      }
-    }, 1000);
-  }
-
-  // ── open overlay ──
-  function openOverlay() {
-    overlay.classList.add('open');
-    document.body.style.overflow = 'hidden';
-    countdown.textContent = fmtTime(LOCKOUT);
-    progFill.style.width = '100%';
-    showRandomMedia();
-    startOverlayTimer();
-    if (navigator.vibrate) navigator.vibrate(15);
-  }
-
-  function closeOverlay() {
-    clearInterval(catTimer);
-    overlay.classList.remove('open');
-    document.body.style.overflow = '';
-    // Revoke any blob URLs
-    var el = mediaWrap.querySelector('img, video');
-    if (el && el.src.startsWith('blob:')) URL.revokeObjectURL(el.src);
-    updateButtonState();
-  }
-
-  // ── media display ──
-  function showRandomMedia() {
-    // Remove previous media but keep no-files msg hidden
-    var prev = mediaWrap.querySelector('img, video');
-    if (prev) { if (prev.src.startsWith('blob:')) URL.revokeObjectURL(prev.src); prev.remove(); }
-
-    if (!catFiles.length) {
-      noFiles.style.display = '';
-      return;
-    }
-    noFiles.style.display = 'none';
-
-    var file = catFiles[Math.floor(Math.random() * catFiles.length)];
-    var url  = URL.createObjectURL(file);
-    var el;
-
-    if (file.type.startsWith('video/')) {
-      el = document.createElement('video');
-      el.autoplay = true; el.loop = true; el.playsInline = true; el.controls = false;
-    } else {
-      el = document.createElement('img');
-      el.alt = 'cat';
-    }
-    el.src = url;
-    mediaWrap.insertBefore(el, noFiles);
-  }
-
-  // ── claim button ──
-  btn.addEventListener('click', function () {
-    var cs = loadCatState();
-    var now = Math.floor(Date.now() / 1000);
-
-    // Blocked during lockout
+    var dur = getTradeSeconds();
     if (cs.lockedUntil && cs.lockedUntil > now) {
       toast('locked · ' + fmtTime(cs.lockedUntil - now) + ' remaining');
       return;
     }
-
-    // Set session end + lockout
-    var newCs = {
-      unlockedUntil: now + LOCKOUT,
-      lockedUntil:   now + LOCKOUT   // lockout kicks in once session ends
-    };
-    saveCatState(newCs);
-    updateButtonState();
-    openOverlay();
+    saveCatState({ lockedUntil: now + dur });
+    refreshCatBtn();
+    catOverlay.open();
   });
 
-  closeBtn.addEventListener('click', closeOverlay);
-  nextBtn.addEventListener('click', showRandomMedia);
-
-  // ── folder picker ──
-  folderBtn.addEventListener('click', function () { folderInp.click(); });
-  folderInp.addEventListener('change', function (e) {
-    catFiles = Array.from(e.target.files).filter(function (f) {
+  // Folder picker
+  folderBtn.addEventListener('click', function() { folderInp.click(); });
+  folderInp.addEventListener('change', function(e) {
+    catFiles = Array.from(e.target.files).filter(function(f) {
       return f.type.startsWith('image/') || f.type.startsWith('video/');
     });
-    if (catFiles.length) {
-      folderBtn.textContent = '📁 ' + catFiles.length + ' cat files loaded';
-      toast(catFiles.length + ' cat files ready');
-    } else {
-      folderBtn.textContent = '📁 select cat folder';
-      toast('no image/video files found');
-    }
+    folderBtn.textContent = catFiles.length ? '📁 ' + catFiles.length + ' cat files loaded' : '📁 choose cat folder';
+    // Also sync the sim folder button label
+    var simFolderBtn = document.getElementById('btn-sim-folder');
+    if (simFolderBtn && catFiles.length) simFolderBtn.textContent = '📁 ' + catFiles.length + ' cat files loaded';
+    toast(catFiles.length ? catFiles.length + ' cat files ready' : 'no image/video files found');
     e.target.value = '';
   });
 
-  // ── poll every second to keep button state fresh ──
-  updateButtonState();
-  setInterval(updateButtonState, 1000);
+  refreshCatBtn();
+  setInterval(refreshCatBtn, 1000);
 })();
+
+// ══════════════════════════════════════════════════════════════════
+// RENDER ADDITIONS — best-fail + sim counters
+// ══════════════════════════════════════════════════════════════════
+// Patch render() to also update sim button-area counters
+var _origRender = render;
+render = function() {
+  _origRender();
+  var d = (function(){ try { return JSON.parse(localStorage.getItem('tdf_v2')) || {}; } catch(e) { return {}; } })();
+  var entries = d.stockEntries || [];
+  var allTime = entries.length;
+  var bestCount = (d.stockBest && d.stockBest.count) || 0;
+  var bestDate  = (d.stockBest && d.stockBest.date)  || null;
+  var el;
+  el = document.getElementById('stock-alltime'); if (el) el.textContent = allTime;
+  el = document.getElementById('stock-best-day-btn'); if (el) el.textContent = bestCount;
+  el = document.getElementById('stock-best-day-btn-date'); if (el) el.textContent = bestDate
+    ? new Date(bestDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—';
+};
+render(); // re-run once to populate the new elements
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });

@@ -560,6 +560,26 @@
 
   <div class="divider"></div>
 
+  <!-- ============ HABIT BOX ============ -->
+  <div class="cat-section">
+    <div class="sec-head">
+      <span class="sec-title">📦 Habit box</span>
+      <span class="sec-sub" id="box-status-label">not started</span>
+    </div>
+    <button class="tap-btn cat-btn" id="btn-box">
+      <span class="btn-label" id="box-btn-label">▶ Start habit box</span>
+      <span class="btn-pts" id="box-btn-meta">72h</span>
+    </button>
+    <div class="cat-timer-bar" id="box-timer-bar">
+      <div class="cat-timer-fill" id="box-timer-fill" style="background:var(--green,#39e87b);"></div>
+    </div>
+    <button class="action-btn full" id="btn-box-folder">📁 choose cat folder</button>
+    <button class="action-btn full" id="btn-box-cancel" style="display:none;color:var(--fail);border-color:rgba(255,77,109,0.3);">✕ cancel habit box</button>
+  </div>
+  <input type="file" id="box-folder-input" webkitdirectory multiple accept="image/*,video/*" style="display:none">
+
+  <div class="divider"></div>
+
   <!-- ============ LOG + DATA ============ -->
   <div>
     <div class="log-heading">Today's log</div>
@@ -593,6 +613,22 @@
         <input id="set-sim-min" type="number" min="0" max="60" style="width:60px;background:var(--bg);border:0.5px solid var(--border);border-radius:8px;color:var(--ink);font-family:'DM Mono',monospace;font-size:13px;padding:8px 10px;text-align:center;">
         <span style="font-size:11px;color:var(--ink3);">min</span>
         <input id="set-sim-sec" type="number" min="0" max="59" style="width:60px;background:var(--bg);border:0.5px solid var(--border);border-radius:8px;color:var(--ink);font-family:'DM Mono',monospace;font-size:13px;padding:8px 10px;text-align:center;">
+        <span style="font-size:11px;color:var(--ink3);">sec</span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;border-top:0.5px solid var(--border);padding-top:14px;">
+      <label style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);">📦 Habit box — wait timer</label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input id="set-box-hours" type="number" min="1" max="168" style="width:72px;background:var(--bg);border:0.5px solid var(--border);border-radius:8px;color:var(--ink);font-family:'DM Mono',monospace;font-size:13px;padding:8px 10px;text-align:center;">
+        <span style="font-size:11px;color:var(--ink3);">hours (max 168 = 1 week)</span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <label style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);">📦 Habit box — reward viewing time</label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input id="set-box-min" type="number" min="0" max="60" style="width:60px;background:var(--bg);border:0.5px solid var(--border);border-radius:8px;color:var(--ink);font-family:'DM Mono',monospace;font-size:13px;padding:8px 10px;text-align:center;">
+        <span style="font-size:11px;color:var(--ink3);">min</span>
+        <input id="set-box-sec" type="number" min="0" max="59" style="width:60px;background:var(--bg);border:0.5px solid var(--border);border-radius:8px;color:var(--ink);font-family:'DM Mono',monospace;font-size:13px;padding:8px 10px;text-align:center;">
         <span style="font-size:11px;color:var(--ink3);">sec</span>
       </div>
     </div>
@@ -640,6 +676,26 @@
     </div>
     <div class="cat-overlay-bottom-row">
       <button class="cat-next-btn" id="cat-next-btn">↻ next</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── HABIT BOX OVERLAY ── -->
+<div class="cat-overlay" id="box-overlay">
+  <div class="cat-media-wrap" id="box-media-wrap">
+    <div class="cat-no-files" id="box-no-files">
+      🐱<br>No cat folder selected yet.<br>Tap <em>choose cat folder</em> below.
+    </div>
+  </div>
+  <div class="cat-overlay-top">
+    <div class="cat-countdown" id="box-countdown" style="background:rgba(57,232,123,0.2);border-color:rgba(57,232,123,0.4);color:var(--green,#39e87b);">4:00</div>
+    <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;color:rgba(255,255,255,0.4);text-transform:uppercase;align-self:center;">earned</div>
+    <div class="cat-close-btn" id="box-close-btn">✕</div>
+  </div>
+  <div class="cat-overlay-bottom">
+    <div class="cat-progress-bar"><div class="cat-progress-fill" id="box-progress-fill" style="background:var(--green,#39e87b);"></div></div>
+    <div class="cat-overlay-bottom-row">
+      <button class="cat-next-btn" id="box-next-btn">↻ next</button>
     </div>
   </div>
 </div>
@@ -927,10 +983,34 @@ function getSimSeconds() {
   var t = loadTimers();
   return ((t.simMin !== undefined ? t.simMin : 0) * 60) + (t.simSec !== undefined ? t.simSec : 25);
 }
+function getBoxWaitSeconds() {
+  var t = loadTimers();
+  return (t.boxHours !== undefined ? t.boxHours : 72) * 3600;
+}
+function getBoxViewSeconds() {
+  var t = loadTimers();
+  return ((t.boxMin !== undefined ? t.boxMin : 4) * 60) + (t.boxSec !== undefined ? t.boxSec : 0);
+}
 function fmtTime(s) {
   s = Math.max(0, s);
   var m = Math.floor(s / 60); var sec = s % 60;
   return m + ':' + (sec < 10 ? '0' : '') + sec;
+}
+// Long format for the habit-box wait (days/hours/min/sec)
+function fmtLong(s) {
+  s = Math.max(0, Math.floor(s));
+  var d = Math.floor(s / 86400); s -= d * 86400;
+  var h = Math.floor(s / 3600);  s -= h * 3600;
+  var m = Math.floor(s / 60);    var sec = s - m * 60;
+  if (d > 0) return d + 'd ' + h + 'h ' + m + 'm';
+  if (h > 0) return h + 'h ' + m + 'm ' + sec + 's';
+  return m + 'm ' + sec + 's';
+}
+// Short label for the button when idle (e.g. "72h" or "3d")
+function fmtBoxLabel(s) {
+  var h = Math.round(s / 3600);
+  if (h >= 24 && h % 24 === 0) return (h / 24) + 'd';
+  return h + 'h';
 }
 
 // Settings panel
@@ -943,19 +1023,29 @@ function fmtTime(s) {
   var inTSec = document.getElementById('set-trade-sec');
   var inSMin = document.getElementById('set-sim-min');
   var inSSec = document.getElementById('set-sim-sec');
+  var inBoxHours = document.getElementById('set-box-hours');
+  var inBoxMin = document.getElementById('set-box-min');
+  var inBoxSec = document.getElementById('set-box-sec');
   btnOpen.addEventListener('click', function() {
     var tt = getTradeSeconds(); inTMin.value = Math.floor(tt/60); inTSec.value = tt%60;
     var st = getSimSeconds(); inSMin.value = Math.floor(st/60); inSSec.value = st%60;
+    inBoxHours.value = Math.round(getBoxWaitSeconds()/3600);
+    var bv = getBoxViewSeconds(); inBoxMin.value = Math.floor(bv/60); inBoxSec.value = bv%60;
     panel.style.display = 'flex';
   });
   btnSave.addEventListener('click', function() {
+    var hrs = parseInt(inBoxHours.value)||72;
+    if (hrs < 1) hrs = 1;
+    if (hrs > 168) hrs = 168;
     saveTimers({
       tradeMin: parseInt(inTMin.value)||0, tradeSec: parseInt(inTSec.value)||0,
-      simMin: parseInt(inSMin.value)||0, simSec: parseInt(inSSec.value)||0
+      simMin: parseInt(inSMin.value)||0, simSec: parseInt(inSSec.value)||0,
+      boxHours: hrs, boxMin: parseInt(inBoxMin.value)||0, boxSec: parseInt(inBoxSec.value)||0
     });
     panel.style.display = 'none';
     if (window.refreshCatBtn) window.refreshCatBtn();
     if (window.refreshSimBtn) window.refreshSimBtn();
+    if (window.refreshBoxBtn) window.refreshBoxBtn();
     toast('timers saved');
   });
   btnCancel.addEventListener('click', function() { panel.style.display = 'none'; });
@@ -968,9 +1058,11 @@ var catFiles = [];
 function syncFolderLabels() {
   var a = document.getElementById('btn-cat-folder');
   var b = document.getElementById('btn-sim-folder');
+  var c = document.getElementById('btn-box-folder');
   var txt = catFiles.length ? '📁 ' + catFiles.length + ' cat files loaded' : '📁 choose cat folder';
   if (a) a.textContent = txt;
   if (b) b.textContent = txt;
+  if (c) c.textContent = txt;
 }
 function handleFolderPick(e) {
   catFiles = Array.from(e.target.files).filter(function(f) {
@@ -1124,6 +1216,106 @@ window.simOverlay = makeOverlay({
   folderBtn.addEventListener('click', function() { folderInp.click(); });
   folderInp.addEventListener('change', handleFolderPick);
   refresh(); setInterval(refresh, 1000);
+})();
+
+// ══════════════════════════════════════════════════════════════════
+// HABIT BOX — long wait timer, then a manual claim that opens cats
+// for a set viewing time. Two states stored in localStorage:
+//   unlockAt: timestamp when the wait finishes (counting down)
+//   ready:    true once countdown is done and waiting for the claim
+// ══════════════════════════════════════════════════════════════════
+(function() {
+  var BOX_KEY = 'tws_box';
+  var btn       = document.getElementById('btn-box');
+  var btnLabel  = document.getElementById('box-btn-label');
+  var btnMeta   = document.getElementById('box-btn-meta');
+  var statusLbl = document.getElementById('box-status-label');
+  var timerBar  = document.getElementById('box-timer-bar');
+  var timerFill = document.getElementById('box-timer-fill');
+  var folderBtn = document.getElementById('btn-box-folder');
+  var folderInp = document.getElementById('box-folder-input');
+  var cancelBtn = document.getElementById('btn-box-cancel');
+
+  var boxOverlay = makeOverlay({
+    overlayId: 'box-overlay', mediaWrapId: 'box-media-wrap', noFilesId: 'box-no-files',
+    countdownId: 'box-countdown', closeBtnId: 'box-close-btn', nextBtnId: 'box-next-btn',
+    progFillId: 'box-progress-fill', getDuration: getBoxViewSeconds,
+    onClose: function() { if (window.refreshBoxBtn) window.refreshBoxBtn(); }
+  });
+
+  function loadBox() { try { return JSON.parse(localStorage.getItem(BOX_KEY)) || {}; } catch(e) { return {}; } }
+  function saveBox(o) { try { localStorage.setItem(BOX_KEY, JSON.stringify(o)); } catch(e) {} }
+
+  function refresh() {
+    var st = loadBox();
+    var now = Math.floor(Date.now() / 1000);
+    var waitDur = getBoxWaitSeconds();
+
+    if (st.unlockAt && st.unlockAt > now) {
+      // Counting down
+      var left = st.unlockAt - now;
+      btn.classList.add('locked');
+      btnLabel.textContent = '🔒 Locked';
+      btnMeta.textContent = fmtLong(left);
+      statusLbl.textContent = 'unlocks in ' + fmtLong(left);
+      timerBar.classList.add('active');
+      timerFill.style.width = ((left / waitDur) * 100) + '%';
+      cancelBtn.style.display = '';
+    } else if (st.unlockAt && st.unlockAt <= now) {
+      // Countdown finished — ready to claim
+      btn.classList.remove('locked');
+      btnLabel.textContent = '✓ Ready — claim your reward';
+      btnMeta.textContent = '🎉';
+      statusLbl.textContent = 'unlocked! tap to view';
+      timerBar.classList.add('active');
+      timerFill.style.width = '100%';
+      cancelBtn.style.display = '';
+    } else {
+      // Idle / not started
+      btn.classList.remove('locked');
+      btnLabel.textContent = '▶ Start habit box';
+      btnMeta.textContent = fmtBoxLabel(waitDur);
+      statusLbl.textContent = 'not started';
+      timerBar.classList.remove('active');
+      cancelBtn.style.display = 'none';
+    }
+  }
+  window.refreshBoxBtn = refresh;
+
+  btn.addEventListener('click', function() {
+    var st = loadBox();
+    var now = Math.floor(Date.now() / 1000);
+
+    if (!st.unlockAt) {
+      // Start the wait
+      saveBox({ unlockAt: now + getBoxWaitSeconds() });
+      refresh();
+      toast('habit box started — ' + fmtBoxLabel(getBoxWaitSeconds()) + ' to go');
+      if (navigator.vibrate) navigator.vibrate(15);
+    } else if (st.unlockAt > now) {
+      // Still locked
+      toast('locked · ' + fmtLong(st.unlockAt - now) + ' left');
+    } else {
+      // Ready — claim reward, then reset to idle
+      saveBox({});
+      refresh();
+      boxOverlay.open();
+    }
+  });
+
+  cancelBtn.addEventListener('click', function() {
+    if (confirm('Cancel the habit box timer? You\'ll lose your progress.')) {
+      saveBox({});
+      refresh();
+      toast('habit box cancelled');
+    }
+  });
+
+  folderBtn.addEventListener('click', function() { folderInp.click(); });
+  folderInp.addEventListener('change', handleFolderPick);
+
+  refresh();
+  setInterval(refresh, 1000);
 })();
 
 

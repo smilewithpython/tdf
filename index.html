@@ -264,6 +264,54 @@
     border-color: rgba(251,191,36,0.4);
   }
 
+  /* ── DAY RATING CALENDAR ── */
+  .cal-wrap {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.875rem 0.875rem 1rem;
+  }
+  .cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .cal-title { font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--ink); }
+  .cal-nav { display: flex; gap: 6px; }
+  .cal-nav button {
+    background: var(--bg); border: 0.5px solid var(--border); border-radius: 8px;
+    color: var(--ink2); width: 30px; height: 30px; cursor: pointer; font-size: 15px;
+    -webkit-tap-highlight-color: transparent; -webkit-appearance: none; appearance: none;
+  }
+  .cal-nav button:disabled { opacity: 0.3; cursor: default; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+  .cal-dow {
+    text-align: center; font-size: 9px; letter-spacing: 0.05em;
+    color: var(--ink3); text-transform: uppercase; padding-bottom: 2px;
+  }
+  .cal-cell {
+    aspect-ratio: 1 / 1; border-radius: 9px;
+    display: flex; align-items: flex-start; justify-content: flex-end;
+    padding: 4px 6px; font-size: 11px; color: var(--ink3);
+    border: 0.5px solid var(--border); background: var(--bg);
+    -webkit-tap-highlight-color: transparent; cursor: pointer; user-select: none;
+  }
+  .cal-cell.blank { border: none; background: transparent; cursor: default; }
+  .cal-cell.locked { opacity: 0.4; cursor: default; }
+  .cal-cell.today { box-shadow: 0 0 0 1.5px var(--ink2) inset; }
+  .cal-cell.c-green  { background: var(--try);   color: #0c2417; border-color: transparent; }
+  .cal-cell.c-yellow { background: var(--stock);  color: #3a2c05; border-color: transparent; }
+  .cal-cell.c-red    { background: var(--fail);   color: #3a0f0f; border-color: transparent; }
+  .cal-cell.c-auto {
+    color: #2a0c0c; border-color: transparent; opacity: 0.92;
+    background-color: var(--fail);
+    background-image: repeating-linear-gradient(45deg, rgba(0,0,0,0.24) 0, rgba(0,0,0,0.24) 3px, transparent 3px, transparent 7px);
+  }
+  .cal-cell.locked.c-green, .cal-cell.locked.c-yellow, .cal-cell.locked.c-red, .cal-cell.locked.c-auto { opacity: 0.85; }
+  .cal-dot.dot-auto {
+    background-color: var(--fail);
+    background-image: repeating-linear-gradient(45deg, rgba(0,0,0,0.32) 0, rgba(0,0,0,0.32) 2px, transparent 2px, transparent 4px);
+  }
+  .cal-legend { display: flex; gap: 14px; justify-content: center; margin-top: 12px; font-size: 10px; color: var(--ink3); }
+  .cal-legend span { display: flex; align-items: center; gap: 5px; }
+  .cal-dot { width: 10px; height: 10px; border-radius: 3px; }
+
   /* ── CAT REWARD ── */
   .cat-section { display: flex; flex-direction: column; gap: 10px; }
 
@@ -415,6 +463,12 @@
     <span class="sec-title">Tasks</span>
     <span class="sec-sub" id="task-total">0 total</span>
   </div>
+  <div class="buttons">
+    <button class="tap-btn try-btn" id="btn-try"><span class="btn-label">Try</span><span class="btn-pts">+1 PT</span></button>
+    <button class="tap-btn do-btn" id="btn-do"><span class="btn-label">Do</span><span class="btn-pts">+1 PT</span></button>
+    <button class="tap-btn fail-btn" id="btn-fail"><span class="btn-label">Fail</span><span class="btn-pts">+1 PT</span></button>
+  </div>
+  <button class="action-btn full" id="btn-undo-task">↩ undo last task</button>
   <div class="stats">
     <div class="stat-card">
       <div class="stat-label">Today</div>
@@ -453,12 +507,6 @@
     </div>
     <div class="bar"><div class="bar-fill" id="task-bar"></div></div>
   </div>
-  <div class="buttons">
-    <button class="tap-btn try-btn" id="btn-try"><span class="btn-label">Try</span><span class="btn-pts">+1 PT</span></button>
-    <button class="tap-btn do-btn" id="btn-do"><span class="btn-label">Do</span><span class="btn-pts">+1 PT</span></button>
-    <button class="tap-btn fail-btn" id="btn-fail"><span class="btn-label">Fail</span><span class="btn-pts">+1 PT</span></button>
-  </div>
-  <button class="action-btn full" id="btn-undo-task">↩ undo last task</button>
 
   <div class="divider"></div>
 
@@ -610,6 +658,31 @@
   </div>
   <input type="file" id="import-file" accept="application/json" style="display:none">
 
+  <div class="divider"></div>
+
+  <!-- ============ DAY RATING (end-of-day) ============ -->
+  <div class="sec-head">
+    <span class="sec-title">Day rating</span>
+    <span class="sec-sub">tap day · cycles color</span>
+  </div>
+  <div class="cal-wrap">
+    <div class="cal-head">
+      <span class="cal-title" id="cal-title">—</span>
+      <div class="cal-nav">
+        <button id="cal-prev" aria-label="previous month">‹</button>
+        <button id="cal-next" aria-label="next month">›</button>
+      </div>
+    </div>
+    <div class="cal-grid" id="cal-dow-row"></div>
+    <div class="cal-grid" id="cal-grid" style="margin-top:5px;"></div>
+    <div class="cal-legend">
+      <span><span class="cal-dot" style="background:var(--try);"></span>good</span>
+      <span><span class="cal-dot" style="background:var(--stock);"></span>ok</span>
+      <span><span class="cal-dot" style="background:var(--fail);"></span>rough</span>
+      <span><span class="cal-dot dot-auto"></span>missed</span>
+    </div>
+  </div>
+
 </div>
 
 <!-- ── SETTINGS PANEL ── -->
@@ -657,6 +730,11 @@
         <input id="set-alltime" type="number" min="0" style="width:100px;background:var(--bg);border:0.5px solid var(--border);border-radius:8px;color:var(--ink);font-family:'DM Mono',monospace;font-size:13px;padding:8px 10px;text-align:center;">
         <span style="font-size:11px;color:var(--ink3);">your real running total</span>
       </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;border-top:0.5px solid var(--border);padding-top:14px;">
+      <label style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);">⚖️ Fix old task points</label>
+      <div style="font-size:11px;color:var(--ink3);line-height:1.6;">Old task days were scored when Do/Fail were worth more. This resets every past task to 1 point and recalculates your task records to match today's scoring. Sims, trades &amp; day ratings are untouched.</div>
+      <button id="btn-recalc-tasks" style="background:none;border:0.5px solid var(--border);border-radius:10px;color:var(--ink2);font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.06em;padding:11px;cursor:pointer;-webkit-tap-highlight-color:transparent;">↺ Recalculate task points (all = 1)</button>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button id="btn-settings-save" style="flex:1;background:var(--trade);border:none;border-radius:10px;color:#fff;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.06em;padding:12px;cursor:pointer;">Save</button>
@@ -746,6 +824,7 @@ function fresh() {
     stockBest: { count: 0, date: null },
     tradeBest: { pts: 0, date: null },
     stockAllTimeBase: null, stockAllTimeBaseAt: null,
+    dayColors: {}, ratingStart: null,
     streak: 0, lastDate: null,
     stockStreak: 0, stockLastDate: null,
     tradeStreak: 0, tradeLastDate: null
@@ -1020,7 +1099,7 @@ document.getElementById('import-file').addEventListener('change', function (ev) 
       const parsed = JSON.parse(reader.result);
       if (!Array.isArray(parsed.entries)) throw new Error('bad file');
       if (!confirm('Replace all current data with this backup? This cannot be undone.')) return;
-      save(Object.assign(fresh(), parsed)); render(); toast('backup imported');
+      save(Object.assign(fresh(), parsed)); render(); if (window.refreshCalendar) window.refreshCalendar(); toast('backup imported');
     } catch (e) { toast('could not read that file'); }
   };
   reader.readAsText(file); ev.target.value = '';
@@ -1114,6 +1193,19 @@ function fmtBoxLabel(s) {
     toast('settings saved');
   });
   btnCancel.addEventListener('click', function() { panel.style.display = 'none'; });
+
+  var btnRecalc = document.getElementById('btn-recalc-tasks');
+  if (btnRecalc) btnRecalc.addEventListener('click', function() {
+    if (!confirm('Set every past task entry to 1 point and recalculate your task records to match current scoring? Sims, trades, and day ratings are untouched.')) return;
+    var d = load();
+    (d.entries || []).forEach(function(e) { e.pts = 1; });
+    var map = dailyTotals(d.entries, true);
+    var bp = 0, bd = null;
+    Object.keys(map).forEach(function(k) { if (map[k] > bp) { bp = map[k]; bd = k; } });
+    d.best = { pts: bp, date: bd };
+    save(d); render();
+    toast('task points recalculated');
+  });
 })();
 
 // ══════════════════════════════════════════════════════════════════
@@ -1381,6 +1473,109 @@ window.simOverlay = makeOverlay({
 
   refresh();
   setInterval(refresh, 1000);
+})();
+
+
+// ══════════════════════════════════════════════════════════════════
+// DAY RATING CALENDAR — tap a day to cycle green/yellow/red/clear
+// Editable window: last 14 days through today. Future is locked.
+// ══════════════════════════════════════════════════════════════════
+(function () {
+  var grid = document.getElementById('cal-grid');
+  var dowRow = document.getElementById('cal-dow-row');
+  var titleEl = document.getElementById('cal-title');
+  var prevBtn = document.getElementById('cal-prev');
+  var nextBtn = document.getElementById('cal-next');
+  if (!grid) return;
+
+  var DOW = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+  dowRow.innerHTML = DOW.map(function (d) { return '<div class="cal-dow">' + d + '</div>'; }).join('');
+
+  var view = new Date(); view.setDate(1); view.setHours(0, 0, 0, 0);
+
+  function ymd(dt) { return dt.toLocaleDateString('en-CA'); }
+  function startOfDay(dt) { var x = new Date(dt); x.setHours(0, 0, 0, 0); return x; }
+  function editableRange() {
+    var t = startOfDay(new Date());
+    var earliest = new Date(t); earliest.setDate(earliest.getDate() - 14);
+    return { earliest: earliest, today: t };
+  }
+
+  // Any past day (on/after the day you started rating) left unrated becomes
+  // an assumed-red 'auto'. Today is never auto-filled (still in progress).
+  function backfillMissed(d) {
+    var changed = false;
+    if (!d.dayColors) d.dayColors = {};
+    if (!d.ratingStart) { d.ratingStart = ymd(startOfDay(new Date())); changed = true; }
+    var todayKey = ymd(startOfDay(new Date()));
+    var cur = new Date(d.ratingStart + 'T12:00:00');
+    var guard = 0;
+    while (guard++ < 4000) {
+      var key = ymd(startOfDay(cur));
+      if (key >= todayKey) break;
+      if (!d.dayColors[key]) { d.dayColors[key] = 'auto'; changed = true; }
+      cur.setDate(cur.getDate() + 1);
+    }
+    return changed;
+  }
+
+  function render() {
+    var d = load();
+    if (backfillMissed(d)) save(d);
+    var colors = d.dayColors || {};
+    var y = view.getFullYear(), m = view.getMonth();
+    titleEl.textContent = view.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    var lead = new Date(y, m, 1).getDay();
+    var daysInMonth = new Date(y, m + 1, 0).getDate();
+    var rng = editableRange();
+    var cells = [];
+    for (var i = 0; i < lead; i++) cells.push('<div class="cal-cell blank"></div>');
+    for (var day = 1; day <= daysInMonth; day++) {
+      var dt = startOfDay(new Date(y, m, day));
+      var key = ymd(dt);
+      var editable = dt >= rng.earliest && dt <= rng.today;
+      var cls = 'cal-cell';
+      var col = colors[key];
+      if (col) cls += ' c-' + col;
+      if (!editable) cls += ' locked';
+      if (dt.getTime() === rng.today.getTime()) cls += ' today';
+      cells.push('<div class="' + cls + '" data-key="' + key + '" data-editable="' + (editable ? 1 : 0) + '">' + day + '</div>');
+    }
+    grid.innerHTML = cells.join('');
+    var now = new Date();
+    nextBtn.disabled = (y > now.getFullYear() || (y === now.getFullYear() && m >= now.getMonth()));
+  }
+
+  grid.addEventListener('click', function (e) {
+    var cell = e.target.closest ? e.target.closest('.cal-cell') : null;
+    if (!cell || cell.classList.contains('blank')) return;
+    if (cell.getAttribute('data-editable') !== '1') { toast('only the last 2 weeks are editable'); return; }
+    var key = cell.getAttribute('data-key');
+    var d = load();
+    if (!d.dayColors) d.dayColors = {};
+    var todayKey = ymd(startOfDay(new Date()));
+    if (key < todayKey) {
+      // Past day: cycle among real colors only. First tap on a missed/blank day -> green.
+      var po = ['green', 'yellow', 'red'];
+      var pi = po.indexOf(d.dayColors[key]);
+      d.dayColors[key] = po[(pi + 1) % po.length];
+    } else {
+      // Today: empty -> green -> yellow -> red -> empty
+      var order = ['', 'green', 'yellow', 'red'];
+      var cur = d.dayColors[key] || '';
+      var next = order[(order.indexOf(cur) + 1) % order.length];
+      if (next) d.dayColors[key] = next; else delete d.dayColors[key];
+    }
+    save(d); render();
+    if (navigator.vibrate) navigator.vibrate(8);
+  });
+
+  prevBtn.addEventListener('click', function () { view.setMonth(view.getMonth() - 1); render(); });
+  nextBtn.addEventListener('click', function () { view.setMonth(view.getMonth() + 1); render(); });
+
+  window.refreshCalendar = render;
+  render();
+  setInterval(render, 60000); // re-check across midnight so missed days auto-fill
 })();
 
 

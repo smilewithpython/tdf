@@ -28,6 +28,7 @@
     --stock: #fbbf24;
     --trade: #a78bfa;
     --hold: #2dd4bf;
+    --cat: #ff9f3f;
     --border: rgba(240,235,227,0.10);
     --radius: 14px;
   }
@@ -100,6 +101,12 @@
   }
   .stat-num { font-size: 2.5rem; font-weight: 500; line-height: 1; color: var(--ink); }
   .stat-meta { font-size: 11px; color: var(--ink3); margin-top: 4px; }
+
+  .mini-rows { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
+  .mini-row { display: flex; justify-content: space-between; font-size: 12px; }
+  .mini-row .mr-date { color: var(--ink3); }
+  .mini-row .mr-val { color: var(--ink); font-weight: 500; }
+  .mini-empty { font-size: 11px; color: var(--ink3); margin-top: 8px; }
 
   .pace {
     background: var(--bg2);
@@ -258,8 +265,6 @@
   }
 
   /* ── CAT REWARD ── */
-  --cat: #ff9f3f;
-
   .cat-section { display: flex; flex-direction: column; gap: 10px; }
 
   .tap-btn.cat-btn .btn-label { color: var(--cat); }
@@ -431,6 +436,16 @@
       </div>
     </div>
   </div>
+  <div class="stats" style="grid-template-columns:1fr 1fr;">
+    <div class="stat-card">
+      <div class="stat-label">Best 3 days</div>
+      <div class="mini-rows" id="task-best3"></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Worst 3 days</div>
+      <div class="mini-rows" id="task-worst3"></div>
+    </div>
+  </div>
   <div class="pace tasks" id="task-pace">
     <div class="pace-row">
       <span id="task-pace-msg">—</span>
@@ -440,8 +455,8 @@
   </div>
   <div class="buttons">
     <button class="tap-btn try-btn" id="btn-try"><span class="btn-label">Try</span><span class="btn-pts">+1 PT</span></button>
-    <button class="tap-btn do-btn" id="btn-do"><span class="btn-label">Do</span><span class="btn-pts">+2 PTS</span></button>
-    <button class="tap-btn fail-btn" id="btn-fail"><span class="btn-label">Fail</span><span class="btn-pts">+4 PTS</span></button>
+    <button class="tap-btn do-btn" id="btn-do"><span class="btn-label">Do</span><span class="btn-pts">+1 PT</span></button>
+    <button class="tap-btn fail-btn" id="btn-fail"><span class="btn-label">Fail</span><span class="btn-pts">+1 PT</span></button>
   </div>
   <button class="action-btn full" id="btn-undo-task">↩ undo last task</button>
 
@@ -486,6 +501,10 @@
       <div class="stat-num" style="font-size:2rem;color:var(--stock);" id="stock-alltime">0</div>
       <div class="stat-meta">simulations</div>
     </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Top 3 days · most sims</div>
+    <div class="mini-rows" id="stock-top3"></div>
   </div>
   <button class="action-btn full" id="btn-undo-stock">↩ undo last sim</button>
 
@@ -534,8 +553,8 @@
   </div>
   <div class="buttons">
     <button class="tap-btn trade-btn" id="btn-trade"><span class="btn-label">Took a trade</span><span class="btn-pts">+2 PTS</span></button>
-    <button class="tap-btn hold-btn" id="btn-notrade"><span class="btn-label">No-trade day</span><span class="btn-pts">+3 PTS</span></button>
-    <button class="tap-btn" id="btn-waited30" style="border-color:rgba(251,191,36,0.25);"><span class="btn-label" style="color:var(--stock);">Didn't trade the open</span><span class="btn-pts">+5 PTS</span></button>
+    <button class="tap-btn hold-btn" id="btn-notrade"><span class="btn-label">No-trade day</span><span class="btn-pts">+10 PTS</span></button>
+    <button class="tap-btn" id="btn-waited30" style="border-color:rgba(251,191,36,0.25);"><span class="btn-label" style="color:var(--stock);">Didn't trade the open</span><span class="btn-pts">+3 PTS</span></button>
   </div>
   <button class="action-btn full" id="btn-undo-trade">↩ undo last trading</button>
 
@@ -595,8 +614,8 @@
 
 <!-- ── SETTINGS PANEL ── -->
 <div id="settings-panel" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
-  <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:1.5rem;width:88%;max-width:360px;display:flex;flex-direction:column;gap:1rem;">
-    <div style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--ink);">Timer Settings</div>
+  <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:1.5rem;width:88%;max-width:360px;display:flex;flex-direction:column;gap:1rem;max-height:88vh;overflow-y:auto;">
+    <div style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--ink);">Settings</div>
     <div style="font-size:11px;color:var(--ink3);line-height:1.7;">Changes take effect on next claim.</div>
     <div style="display:flex;flex-direction:column;gap:6px;">
       <label style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);">🐾 Traded with structure</label>
@@ -630,6 +649,13 @@
         <span style="font-size:11px;color:var(--ink3);">min</span>
         <input id="set-box-sec" type="number" min="0" max="59" style="width:60px;background:var(--bg);border:0.5px solid var(--border);border-radius:8px;color:var(--ink);font-family:'DM Mono',monospace;font-size:13px;padding:8px 10px;text-align:center;">
         <span style="font-size:11px;color:var(--ink3);">sec</span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;border-top:0.5px solid var(--border);padding-top:14px;">
+      <label style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);">📈 All-time sims total <span style="color:var(--stock);font-size:9px;">manual — keeps counting up</span></label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input id="set-alltime" type="number" min="0" style="width:100px;background:var(--bg);border:0.5px solid var(--border);border-radius:8px;color:var(--ink);font-family:'DM Mono',monospace;font-size:13px;padding:8px 10px;text-align:center;">
+        <span style="font-size:11px;color:var(--ink3);">your real running total</span>
       </div>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
@@ -704,8 +730,8 @@
 
 <script>
 const KEY = 'tdf_v2';
-const PTS = { try: 1, do: 2, fail: 4 };
-const TRADE_PTS = { trade: 2, notrade: 3, waited30: 5 };
+const PTS = { try: 1, do: 1, fail: 1 };
+const TRADE_PTS = { trade: 2, notrade: 10, waited30: 3 };
 
 function today() { return new Date().toLocaleDateString('en-CA'); }
 function yesterday() { return new Date(Date.now() - 86400000).toLocaleDateString('en-CA'); }
@@ -719,6 +745,7 @@ function fresh() {
     bestFail: { count: 0, date: null },
     stockBest: { count: 0, date: null },
     tradeBest: { pts: 0, date: null },
+    stockAllTimeBase: null, stockAllTimeBaseAt: null,
     streak: 0, lastDate: null,
     stockStreak: 0, stockLastDate: null,
     tradeStreak: 0, tradeLastDate: null
@@ -752,6 +779,32 @@ function taskPtsToday(d) { return entriesToday(d.entries).reduce(function (s, e)
 function stockToday(d) { return entriesToday(d.stockEntries).length; }
 function tradePtsToday(d) { return entriesToday(d.tradeEntries).reduce(function (s, e) { return s + e.pts; }, 0); }
 function hasNoTradeToday(d) { return entriesToday(d.tradeEntries).some(function (e) { return e.type === 'notrade'; }); }
+
+function dailyTotals(arr, byPts) {
+  var m = {};
+  arr.forEach(function (e) { m[e.date] = (m[e.date] || 0) + (byPts ? e.pts : 1); });
+  return m;
+}
+function topDays(map, n, asc) {
+  var rows = Object.keys(map).map(function (dt) { return { date: dt, val: map[dt] }; });
+  rows.sort(function (a, b) { return asc ? (a.val - b.val) : (b.val - a.val); });
+  return rows.slice(0, n);
+}
+function renderMiniRows(elId, rows, suffix) {
+  var el = document.getElementById(elId); if (!el) return;
+  if (!rows.length) { el.innerHTML = '<div class="mini-empty">no days yet</div>'; return; }
+  el.innerHTML = rows.map(function (r) {
+    var dt = new Date(r.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return '<div class="mini-row"><span class="mr-date">' + dt + '</span><span class="mr-val">' + r.val + (suffix || '') + '</span></div>';
+  }).join('');
+}
+function allTimeSims(d) {
+  var logged = d.stockEntries ? d.stockEntries.length : 0;
+  if (d.stockAllTimeBase != null && d.stockAllTimeBaseAt != null) {
+    return d.stockAllTimeBase + (logged - d.stockAllTimeBaseAt);
+  }
+  return logged;
+}
 
 function bumpStreak(d, lastKey, streakKey) {
   const t = today();
@@ -814,7 +867,13 @@ function render() {
   _el = document.getElementById('stock-best-day-btn'); if (_el) _el.textContent = d.stockBest.count || 0;
   _el = document.getElementById('stock-best-day-btn-date'); if (_el) _el.textContent = d.stockBest.date
     ? new Date(d.stockBest.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—';
-  _el = document.getElementById('stock-alltime'); if (_el) _el.textContent = d.stockEntries.length;
+  _el = document.getElementById('stock-alltime'); if (_el) _el.textContent = allTimeSims(d);
+
+  // Leaderboards
+  var _taskMap = dailyTotals(d.entries, true);
+  renderMiniRows('task-best3', topDays(_taskMap, 3, false), ' pts');
+  renderMiniRows('task-worst3', topDays(_taskMap, 3, true), ' pts');
+  renderMiniRows('stock-top3', topDays(dailyTotals(d.stockEntries, false), 3, false), '');
 
   // Trading
   const rp = tradePtsToday(d);
@@ -911,8 +970,8 @@ function logTrade(type, btn, flashClass) {
   if (rp > d.tradeBest.pts) { d.tradeBest = { pts: rp, date: t }; record = d.tradeBest.pts > pts; }
   save(d); render(); flash(btn, flashClass);
   if (record) toast('★ new best trading day — ' + rp + ' pts', true);
-  else if (type === 'notrade') toast('held — +3 for discipline');
-  else if (type === 'waited30') toast('first 30 min respected — +5 pts');
+  else if (type === 'notrade') toast('held — +10 for discipline');
+  else if (type === 'waited30') toast('first 30 min respected — +3 pts');
   else toast('trade logged — +2');
 }
 
@@ -1026,11 +1085,13 @@ function fmtBoxLabel(s) {
   var inBoxHours = document.getElementById('set-box-hours');
   var inBoxMin = document.getElementById('set-box-min');
   var inBoxSec = document.getElementById('set-box-sec');
+  var inAllTime = document.getElementById('set-alltime');
   btnOpen.addEventListener('click', function() {
     var tt = getTradeSeconds(); inTMin.value = Math.floor(tt/60); inTSec.value = tt%60;
     var st = getSimSeconds(); inSMin.value = Math.floor(st/60); inSSec.value = st%60;
     inBoxHours.value = Math.round(getBoxWaitSeconds()/3600);
     var bv = getBoxViewSeconds(); inBoxMin.value = Math.floor(bv/60); inBoxSec.value = bv%60;
+    inAllTime.value = allTimeSims(load());
     panel.style.display = 'flex';
   });
   btnSave.addEventListener('click', function() {
@@ -1042,11 +1103,15 @@ function fmtBoxLabel(s) {
       simMin: parseInt(inSMin.value)||0, simSec: parseInt(inSSec.value)||0,
       boxHours: hrs, boxMin: parseInt(inBoxMin.value)||0, boxSec: parseInt(inBoxSec.value)||0
     });
+    var _d = load();
+    var _av = parseInt(inAllTime.value);
+    if (!isNaN(_av) && _av >= 0) { _d.stockAllTimeBase = _av; _d.stockAllTimeBaseAt = (_d.stockEntries || []).length; save(_d); }
+    render();
     panel.style.display = 'none';
     if (window.refreshCatBtn) window.refreshCatBtn();
     if (window.refreshSimBtn) window.refreshSimBtn();
     if (window.refreshBoxBtn) window.refreshBoxBtn();
-    toast('timers saved');
+    toast('settings saved');
   });
   btnCancel.addEventListener('click', function() { panel.style.display = 'none'; });
 })();

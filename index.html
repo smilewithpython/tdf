@@ -312,6 +312,53 @@
   .cal-legend span { display: flex; align-items: center; gap: 5px; }
   .cal-dot { width: 10px; height: 10px; border-radius: 3px; }
 
+  /* ── LIVE DASHBOARD ── */
+  .task-quick { display: flex; gap: 8px; }
+  .qbtn {
+    flex: 1; background: var(--bg2); border: 0.5px solid var(--border);
+    border-radius: 12px; padding: 0.8rem 0.4rem; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    -webkit-tap-highlight-color: transparent; -webkit-appearance: none; appearance: none;
+    transition: transform 0.08s ease, background 0.08s ease; user-select: none;
+  }
+  .qbtn:active { transform: scale(0.96); }
+  .qbtn .ql { font-family: 'Playfair Display', serif; font-size: 1.2rem; letter-spacing: -0.01em; line-height: 1; }
+  .qbtn .qp { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.08em; color: var(--ink3); }
+  .qbtn.try .ql { color: var(--try); }
+  .qbtn.do .ql { color: var(--do); }
+  .qbtn.fail .ql { color: var(--fail); }
+  .qbtn.flash-try { background: #1a3d2b; }
+  .qbtn.flash-do { background: #172e4a; }
+  .qbtn.flash-fail { background: #3d1a1e; }
+
+  .counters { display: flex; flex-direction: column; gap: 10px; }
+  .counter-card {
+    background: var(--bg2); border: 0.5px solid var(--border);
+    border-radius: var(--radius); padding: 0.75rem 1rem 0.85rem;
+  }
+  .counter-head { display: flex; align-items: center; justify-content: space-between; }
+  .counter-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3); }
+  .counter-reset {
+    background: none; border: none; color: var(--ink3); font-size: 13px; cursor: pointer;
+    padding: 0 2px; -webkit-tap-highlight-color: transparent; line-height: 1;
+  }
+  .counter-reset:active { color: var(--ink); }
+  .counter-val {
+    font-family: 'DM Mono', monospace; font-weight: 500; color: var(--ink);
+    font-size: 1.7rem; letter-spacing: 0.01em; line-height: 1.1; margin-top: 4px;
+    overflow: hidden; text-overflow: ellipsis;
+  }
+  .counter-val.big { color: var(--try); font-size: 1.5rem; }
+
+  .active-sw { display: flex; flex-direction: column; gap: 6px; }
+  .active-sw-row {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--bg2); border: 0.5px solid var(--border); border-radius: 10px;
+    padding: 0.5rem 0.875rem; font-size: 12px;
+  }
+  .active-sw-row .nm { color: var(--ink2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%; }
+  .active-sw-row .tm { font-family: 'DM Mono', monospace; color: var(--try); }
+
   /* ── STOPWATCHES ── */
   .sw-card {
     background: var(--bg2); border: 0.5px solid var(--border);
@@ -495,17 +542,34 @@
     <button id="btn-settings-open" style="position:absolute;top:0;right:0;background:none;border:0.5px solid var(--border);border-radius:8px;color:var(--ink3);font-size:11px;letter-spacing:0.06em;padding:5px 10px;cursor:pointer;font-family:'DM Mono',monospace;">⚙ timers</button>
   </div>
 
+  <!-- ============ LIVE DASHBOARD ============ -->
+  <div class="task-quick">
+    <button class="qbtn try" id="btn-try"><span class="ql">Try</span><span class="qp">+1</span></button>
+    <button class="qbtn do" id="btn-do"><span class="ql">Do</span><span class="qp">+1</span></button>
+    <button class="qbtn fail" id="btn-fail"><span class="ql">Fail</span><span class="qp">+1</span></button>
+  </div>
+  <button class="action-btn full" id="btn-undo-task">↩ undo last task</button>
+
+  <div class="counters">
+    <div class="counter-card">
+      <div class="counter-head"><span class="counter-label">Day counter</span><button class="counter-reset" id="day-counter-reset">↺</button></div>
+      <div class="counter-val" id="day-counter-val">0.0000</div>
+    </div>
+    <div class="counter-card">
+      <div class="counter-head"><span class="counter-label">Counter</span><button class="counter-reset" id="big-counter-reset">↺</button></div>
+      <div class="counter-val big" id="big-counter-val">50,000,000.0000</div>
+    </div>
+  </div>
+
+  <div id="active-sw-mirror" class="active-sw" style="display:none;"></div>
+
+  <div class="divider"></div>
+
   <!-- ============ TASKS ============ -->
   <div class="sec-head">
     <span class="sec-title">Tasks</span>
     <span class="sec-sub" id="task-total">0 total</span>
   </div>
-  <div class="buttons">
-    <button class="tap-btn try-btn" id="btn-try"><span class="btn-label">Try</span><span class="btn-pts">+1 PT</span></button>
-    <button class="tap-btn do-btn" id="btn-do"><span class="btn-label">Do</span><span class="btn-pts">+1 PT</span></button>
-    <button class="tap-btn fail-btn" id="btn-fail"><span class="btn-label">Fail</span><span class="btn-pts">+1 PT</span></button>
-  </div>
-  <button class="action-btn full" id="btn-undo-task">↩ undo last task</button>
   <div class="stats">
     <div class="stat-card">
       <div class="stat-label">Today</div>
@@ -884,6 +948,7 @@ function fresh() {
     tradeBest: { pts: 0, date: null },
     stockAllTimeBase: null, stockAllTimeBaseAt: null,
     dayColors: {}, ratingStart: null, stopwatches: [],
+    dayCounter: null, bigCounter: null,
     streak: 0, lastDate: null,
     stockStreak: 0, stockLastDate: null,
     tradeStreak: 0, tradeLastDate: null
@@ -1806,6 +1871,99 @@ window.simOverlay = makeOverlay({
   build();
   setInterval(tick, 1000);
   window.refreshStopwatches = build;
+})();
+
+
+// ══════════════════════════════════════════════════════════════════
+// LIVE DASHBOARD — day counter (4 decimals), big counter (starts at
+// 50,000,000, rises a random 50–120 per day spread over every second),
+// and a mirror of any running stopwatches. Refreshes 4x/second.
+// ══════════════════════════════════════════════════════════════════
+(function () {
+  var dayEl = document.getElementById('day-counter-val');
+  var bigEl = document.getElementById('big-counter-val');
+  var mirror = document.getElementById('active-sw-mirror');
+  if (!dayEl || !bigEl) return;
+
+  function fmtNum(n, dec) { return n.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec }); }
+  function todayKey() { return new Date().toLocaleDateString('en-CA'); }
+  function randInt(lo, hi) { return Math.floor(Math.random() * (hi - lo + 1)) + lo; }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function fmtDur(ms) {
+    var s = Math.floor((ms || 0) / 1000);
+    var d = Math.floor(s / 86400); s -= d * 86400;
+    var h = Math.floor(s / 3600); s -= h * 3600;
+    var m = Math.floor(s / 60); var sec = s - m * 60;
+    return (d > 0 ? d + 'd ' : '') + pad(h) + ':' + pad(m) + ':' + pad(sec);
+  }
+  function elapsedSW(sw) { return (sw.accumulated || 0) + (sw.running && sw.startedAt ? (Date.now() - sw.startedAt) : 0); }
+
+  function ensureInit() {
+    var d = load(); var changed = false;
+    if (!d.dayCounter || !d.dayCounter.startedAt) { d.dayCounter = { startedAt: Date.now() }; changed = true; }
+    if (!d.bigCounter || d.bigCounter.base == null) {
+      d.bigCounter = { base: 50000000, startedAt: Date.now(), dailyAmount: randInt(50, 120), lastDay: todayKey() };
+      changed = true;
+    }
+    if (changed) save(d);
+  }
+
+  function bigValue(d) {
+    var bc = d.bigCounter;
+    var elapsedSec = (Date.now() - bc.startedAt) / 1000;
+    return bc.base + elapsedSec * (bc.dailyAmount / 86400);
+  }
+
+  function rolloverIfNeeded() {
+    var d = load(); var bc = d.bigCounter; if (!bc) return;
+    if (bc.lastDay !== todayKey()) {
+      bc.base = bigValue(d);
+      bc.startedAt = Date.now();
+      bc.dailyAmount = randInt(50, 120);
+      bc.lastDay = todayKey();
+      save(d);
+    }
+  }
+
+  function tick() {
+    var d = load();
+    if (!d.dayCounter || !d.dayCounter.startedAt || !d.bigCounter || d.bigCounter.base == null) {
+      ensureInit(); d = load();
+    }
+    rolloverIfNeeded();
+    d = load();
+
+    var days = (Date.now() - d.dayCounter.startedAt) / 86400000;
+    dayEl.textContent = fmtNum(days, 4);
+    bigEl.textContent = fmtNum(bigValue(d), 4);
+
+    if (mirror) {
+      var act = (d.stopwatches || []).filter(function (sw) { return sw.running; });
+      if (!act.length) { mirror.innerHTML = ''; mirror.style.display = 'none'; }
+      else {
+        mirror.style.display = 'flex';
+        mirror.innerHTML = act.map(function (sw) {
+          return '<div class="active-sw-row"><span class="nm">' + esc(sw.name) + '</span><span class="tm">' + fmtDur(elapsedSW(sw)) + '</span></div>';
+        }).join('');
+      }
+    }
+  }
+
+  var dayReset = document.getElementById('day-counter-reset');
+  if (dayReset) dayReset.addEventListener('click', function () {
+    if (!confirm('Reset the day counter back to 0.0000?')) return;
+    var d = load(); d.dayCounter = { startedAt: Date.now() }; save(d); tick(); toast('day counter reset');
+  });
+  var bigReset = document.getElementById('big-counter-reset');
+  if (bigReset) bigReset.addEventListener('click', function () {
+    if (!confirm('Reset the counter back to 50,000,000?')) return;
+    var d = load(); d.bigCounter = { base: 50000000, startedAt: Date.now(), dailyAmount: randInt(50, 120), lastDay: todayKey() }; save(d); tick(); toast('counter reset to 50,000,000');
+  });
+
+  ensureInit();
+  tick();
+  setInterval(tick, 250);
 })();
 
 

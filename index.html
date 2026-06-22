@@ -312,6 +312,33 @@
   .cal-legend span { display: flex; align-items: center; gap: 5px; }
   .cal-dot { width: 10px; height: 10px; border-radius: 3px; }
 
+  /* ── STOPWATCHES ── */
+  .sw-card {
+    background: var(--bg2); border: 0.5px solid var(--border);
+    border-radius: var(--radius); padding: 0.875rem 1rem;
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .sw-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .sw-name {
+    font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--ink);
+    cursor: pointer; border-bottom: 1px dashed var(--ink3);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70%;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .sw-reset {
+    background: var(--bg); border: 0.5px solid var(--border); border-radius: 8px;
+    color: var(--ink2); font-size: 11px; letter-spacing: 0.04em; padding: 7px 12px;
+    cursor: pointer; font-family: 'DM Mono', monospace; -webkit-tap-highlight-color: transparent;
+    -webkit-appearance: none; appearance: none; white-space: nowrap;
+  }
+  .sw-reset:active { transform: scale(0.97); }
+  .sw-time {
+    font-family: 'DM Mono', monospace; font-size: 1.9rem; font-weight: 500;
+    color: var(--ink); letter-spacing: 0.02em; line-height: 1;
+  }
+  .sw-best { font-size: 11px; color: var(--ink3); }
+  .sw-best strong { color: var(--ink2); font-weight: 500; }
+
   /* ── CAT REWARD ── */
   .cat-section { display: flex; flex-direction: column; gap: 10px; }
 
@@ -683,6 +710,15 @@
     </div>
   </div>
 
+  <div class="divider"></div>
+
+  <!-- ============ STOPWATCHES ============ -->
+  <div class="sec-head">
+    <span class="sec-title">Stopwatches</span>
+    <span class="sec-sub">tap name to rename</span>
+  </div>
+  <div id="sw-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+
 </div>
 
 <!-- ── SETTINGS PANEL ── -->
@@ -824,7 +860,7 @@ function fresh() {
     stockBest: { count: 0, date: null },
     tradeBest: { pts: 0, date: null },
     stockAllTimeBase: null, stockAllTimeBaseAt: null,
-    dayColors: {}, ratingStart: null,
+    dayColors: {}, ratingStart: null, stopwatches: [],
     streak: 0, lastDate: null,
     stockStreak: 0, stockLastDate: null,
     tradeStreak: 0, tradeLastDate: null
@@ -1099,7 +1135,7 @@ document.getElementById('import-file').addEventListener('change', function (ev) 
       const parsed = JSON.parse(reader.result);
       if (!Array.isArray(parsed.entries)) throw new Error('bad file');
       if (!confirm('Replace all current data with this backup? This cannot be undone.')) return;
-      save(Object.assign(fresh(), parsed)); render(); if (window.refreshCalendar) window.refreshCalendar(); toast('backup imported');
+      save(Object.assign(fresh(), parsed)); render(); if (window.refreshCalendar) window.refreshCalendar(); if (window.refreshStopwatches) window.refreshStopwatches(); toast('backup imported');
     } catch (e) { toast('could not read that file'); }
   };
   reader.readAsText(file); ev.target.value = '';
@@ -1576,6 +1612,102 @@ window.simOverlay = makeOverlay({
   window.refreshCalendar = render;
   render();
   setInterval(render, 60000); // re-check across midnight so missed days auto-fill
+})();
+
+
+// ══════════════════════════════════════════════════════════════════
+// STOPWATCHES — 4 count-up timers. Run nonstop from last reset (real
+// wall-clock, even while the app is closed). Reset banks the run as
+// "best" if it beat the record. Names are editable.
+// ══════════════════════════════════════════════════════════════════
+(function () {
+  var listEl = document.getElementById('sw-list');
+  if (!listEl) return;
+
+  function fmtDur(ms) {
+    var s = Math.floor((ms || 0) / 1000);
+    var d = Math.floor(s / 86400); s -= d * 86400;
+    var h = Math.floor(s / 3600); s -= h * 3600;
+    var m = Math.floor(s / 60); var sec = s - m * 60;
+    var p = function (n) { return (n < 10 ? '0' : '') + n; };
+    return (d > 0 ? d + 'd ' : '') + p(h) + ':' + p(m) + ':' + p(sec);
+  }
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function init() {
+    var d = load();
+    if (!Array.isArray(d.stopwatches) || d.stopwatches.length < 4) {
+      d.stopwatches = [];
+      for (var i = 0; i < 4; i++) {
+        d.stopwatches.push({ name: 'Stopwatch ' + (i + 1), startedAt: Date.now(), best: 0, lastRun: 0 });
+      }
+      save(d);
+    }
+  }
+
+  function build() {
+    var d = load();
+    listEl.innerHTML = d.stopwatches.map(function (sw, i) {
+      return '<div class="sw-card">' +
+        '<div class="sw-top">' +
+          '<span class="sw-name" data-i="' + i + '">' + escapeHtml(sw.name) + '</span>' +
+          '<button class="sw-reset" data-i="' + i + '">↺ reset</button>' +
+        '</div>' +
+        '<div class="sw-time" id="sw-time-' + i + '">00:00:00</div>' +
+        '<div class="sw-best">best <strong>' + fmtDur(sw.best || 0) + '</strong>' +
+          (sw.lastRun ? ' · last ' + fmtDur(sw.lastRun) : '') + '</div>' +
+      '</div>';
+    }).join('');
+    tick();
+  }
+
+  function tick() {
+    var d = load();
+    if (!d.stopwatches) return;
+    var now = Date.now();
+    d.stopwatches.forEach(function (sw, i) {
+      var el = document.getElementById('sw-time-' + i);
+      if (el) el.textContent = fmtDur(now - (sw.startedAt || now));
+    });
+  }
+
+  function resetWatch(i) {
+    var d = load(); var sw = d.stopwatches[i]; if (!sw) return;
+    var run = Date.now() - (sw.startedAt || Date.now());
+    if (!confirm('Reset "' + sw.name + '"? It ran ' + fmtDur(run) + '. Your best is kept.')) return;
+    if (run > (sw.best || 0)) sw.best = run;
+    sw.lastRun = run;
+    sw.startedAt = Date.now();
+    save(d); build();
+    if (navigator.vibrate) navigator.vibrate(12);
+    toast('reset — ran ' + fmtDur(run));
+  }
+
+  function renameWatch(i) {
+    var d = load(); var sw = d.stopwatches[i]; if (!sw) return;
+    var name = prompt('Name this stopwatch:', sw.name);
+    if (name === null) return;
+    name = name.trim();
+    if (!name) return;
+    sw.name = name.slice(0, 24);
+    save(d); build();
+  }
+
+  listEl.addEventListener('click', function (e) {
+    var rb = e.target.closest ? e.target.closest('.sw-reset') : null;
+    if (rb) { resetWatch(+rb.getAttribute('data-i')); return; }
+    var nm = e.target.closest ? e.target.closest('.sw-name') : null;
+    if (nm) { renameWatch(+nm.getAttribute('data-i')); return; }
+  });
+
+  init();
+  build();
+  setInterval(tick, 1000);
+  window.refreshStopwatches = build;
 })();
 
 

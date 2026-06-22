@@ -876,6 +876,30 @@
         <span style="font-size:11px;color:var(--ink3);">your real running total</span>
       </div>
     </div>
+    <div style="display:flex;flex-direction:column;gap:10px;border-top:0.5px solid var(--border);padding-top:14px;">
+      <label style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);">🔊 Sounds <span style="color:var(--ink3);font-size:9px;">on point taps</span></label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink2);"><input type="checkbox" id="set-snd-on" style="accent-color:var(--try);width:16px;height:16px;"> Play sounds</label>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:11px;color:var(--ink3);width:54px;">Style</span>
+        <select id="set-snd-style" style="flex:1;background:var(--bg);border:0.5px solid var(--border);border-radius:8px;color:var(--ink);font-family:'DM Mono',monospace;font-size:12px;padding:8px;">
+          <option value="coin">Coin (jingle)</option>
+          <option value="bell">Bell (calm)</option>
+          <option value="marimba">Marimba (warm)</option>
+        </select>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink2);"><input type="checkbox" id="set-snd-distinct" style="accent-color:var(--try);width:16px;height:16px;"> Distinct note per button</label>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:11px;color:var(--ink3);width:54px;">Volume</span>
+        <input type="range" id="set-snd-vol" min="0" max="100" style="flex:1;accent-color:var(--try);">
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <span style="font-size:11px;color:var(--ink3);">Play on:</span>
+        <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink2);"><input type="checkbox" id="set-snd-tasks" style="accent-color:var(--try);"> Tasks</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink2);"><input type="checkbox" id="set-snd-stock" style="accent-color:var(--try);"> Sims</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink2);"><input type="checkbox" id="set-snd-trading" style="accent-color:var(--try);"> Trading</label>
+      </div>
+      <button id="set-snd-test" style="background:var(--bg);border:0.5px solid var(--border);border-radius:10px;color:var(--ink2);font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.04em;padding:10px;cursor:pointer;">▶ test sound</button>
+    </div>
     <div style="display:flex;flex-direction:column;gap:8px;border-top:0.5px solid var(--border);padding-top:14px;">
       <label style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);">⚖️ Fix old task points</label>
       <div style="font-size:11px;color:var(--ink3);line-height:1.6;">Old task days were scored when Do/Fail were worth more. This resets every past task to 1 point and recalculates your task records to match today's scoring. Sims, trades &amp; day ratings are untouched.</div>
@@ -1172,7 +1196,61 @@ function toast(msg, isRecord) {
 }
 function flash(btn, cls) { btn.classList.add(cls); setTimeout(function () { btn.classList.remove(cls); }, 150); }
 
+// ── Sound: tiny Web Audio synth for point taps. No files, works offline. ──
+var Sound = (function () {
+  var ctx = null, master = null;
+  var NOTES = { 'try': 523.25, 'do': 587.33, 'fail': 659.25, 'stock': 698.46, 'trade': 783.99, 'notrade': 880.00, 'waited30': 987.77 };
+  var CAT = { 'try': 'tasks', 'do': 'tasks', 'fail': 'tasks', 'stock': 'stock', 'trade': 'trading', 'notrade': 'trading', 'waited30': 'trading' };
+  function ensure() {
+    if (!ctx) {
+      try { ctx = new (window.AudioContext || window.webkitAudioContext)(); master = ctx.createGain(); master.connect(ctx.destination); } catch (e) { ctx = null; }
+    }
+    if (ctx && ctx.state === 'suspended') { try { ctx.resume(); } catch (e) {} }
+    return ctx;
+  }
+  function stored() {
+    var t = (typeof loadTimers === 'function') ? loadTimers() : {};
+    return {
+      on: t.sndOn !== false,
+      style: t.sndStyle || 'coin',
+      distinct: t.sndDistinct !== false,
+      vol: (t.sndVol != null ? t.sndVol / 100 : 0.5),
+      cats: { tasks: t.sndTasks !== false, stock: t.sndStock !== false, trading: t.sndTrading !== false }
+    };
+  }
+  function tone(freq, start, dur, type, peak) {
+    var o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, start);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0002, peak), start + 0.006);
+    g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+    o.connect(g); g.connect(master);
+    o.start(start); o.stop(start + dur + 0.03);
+  }
+  function play(which, override) {
+    var s = override || stored();
+    if (!s.on) return;
+    if (s.cats && s.cats[CAT[which]] === false) return;
+    if (!ensure()) return;
+    master.gain.value = (s.vol != null ? s.vol : 0.5);
+    var freq = s.distinct ? (NOTES[which] || 587.33) : 587.33;
+    var t = ctx.currentTime;
+    if (s.style === 'bell') {
+      tone(freq, t, 0.55, 'sine', 0.5);
+      tone(freq * 2, t, 0.38, 'sine', 0.16);
+    } else if (s.style === 'marimba') {
+      tone(freq, t, 0.22, 'triangle', 0.5);
+      tone(freq * 2, t, 0.10, 'sine', 0.12);
+    } else { // coin
+      tone(freq, t, 0.10, 'square', 0.30);
+      tone(freq * 1.5, t + 0.06, 0.16, 'square', 0.30);
+    }
+  }
+  return { play: play, preview: function (s, which) { play(which || 'do', s); } };
+})();
+
 function logTask(type, btn, flashClass) {
+  Sound.play(type);
   const d = load(); const t = today(); const pts = PTS[type];
   d.entries.push({ type: type, pts: pts, date: t, ts: new Date().toISOString() });
   bumpStreak(d, 'lastDate', 'streak');
@@ -1194,6 +1272,7 @@ document.getElementById('btn-do').addEventListener('click', function () { logTas
 document.getElementById('btn-fail').addEventListener('click', function () { logTask('fail', this, 'flash-fail'); });
 
 document.getElementById('btn-stock').addEventListener('click', function () {
+  Sound.play('stock');
   const d = load(); const t = today();
   d.stockEntries.push({ date: t, ts: new Date().toISOString() });
   bumpStreak(d, 'stockLastDate', 'stockStreak');
@@ -1210,6 +1289,7 @@ function logTrade(type, btn, flashClass) {
   const d = load(); const t = today(); const pts = TRADE_PTS[type];
   if (type === 'notrade' && hasNoTradeToday(d)) { toast('no-trade day already logged'); return; }
   if (type === 'waited30' && entriesToday(d.tradeEntries).some(function(e){ return e.type === 'waited30'; })) { toast('already logged for today'); return; }
+  Sound.play(type);
   d.tradeEntries.push({ type: type, pts: pts, date: t, ts: new Date().toISOString() });
   bumpStreak(d, 'tradeLastDate', 'tradeStreak');
   const rp = tradePtsToday(d);
@@ -1333,23 +1413,41 @@ function fmtBoxLabel(s) {
   var inBoxMin = document.getElementById('set-box-min');
   var inBoxSec = document.getElementById('set-box-sec');
   var inAllTime = document.getElementById('set-alltime');
+  var inSndOn = document.getElementById('set-snd-on');
+  var inSndStyle = document.getElementById('set-snd-style');
+  var inSndDistinct = document.getElementById('set-snd-distinct');
+  var inSndVol = document.getElementById('set-snd-vol');
+  var inSndTasks = document.getElementById('set-snd-tasks');
+  var inSndStock = document.getElementById('set-snd-stock');
+  var inSndTrading = document.getElementById('set-snd-trading');
+  var btnSndTest = document.getElementById('set-snd-test');
   btnOpen.addEventListener('click', function() {
     var tt = getTradeSeconds(); inTMin.value = Math.floor(tt/60); inTSec.value = tt%60;
     var st = getSimSeconds(); inSMin.value = Math.floor(st/60); inSSec.value = st%60;
     inBoxHours.value = Math.round(getBoxWaitSeconds()/3600);
     var bv = getBoxViewSeconds(); inBoxMin.value = Math.floor(bv/60); inBoxSec.value = bv%60;
     inAllTime.value = allTimeSims(load());
+    var tsnd = loadTimers();
+    inSndOn.checked = tsnd.sndOn !== false;
+    inSndStyle.value = tsnd.sndStyle || 'coin';
+    inSndDistinct.checked = tsnd.sndDistinct !== false;
+    inSndVol.value = tsnd.sndVol != null ? tsnd.sndVol : 50;
+    inSndTasks.checked = tsnd.sndTasks !== false;
+    inSndStock.checked = tsnd.sndStock !== false;
+    inSndTrading.checked = tsnd.sndTrading !== false;
     panel.style.display = 'flex';
   });
   btnSave.addEventListener('click', function() {
     var hrs = parseInt(inBoxHours.value)||72;
     if (hrs < 1) hrs = 1;
     if (hrs > 168) hrs = 168;
-    saveTimers({
+    saveTimers(Object.assign(loadTimers(), {
       tradeMin: parseInt(inTMin.value)||0, tradeSec: parseInt(inTSec.value)||0,
       simMin: parseInt(inSMin.value)||0, simSec: parseInt(inSSec.value)||0,
-      boxHours: hrs, boxMin: parseInt(inBoxMin.value)||0, boxSec: parseInt(inBoxSec.value)||0
-    });
+      boxHours: hrs, boxMin: parseInt(inBoxMin.value)||0, boxSec: parseInt(inBoxSec.value)||0,
+      sndOn: inSndOn.checked, sndStyle: inSndStyle.value, sndDistinct: inSndDistinct.checked,
+      sndVol: parseInt(inSndVol.value)||0, sndTasks: inSndTasks.checked, sndStock: inSndStock.checked, sndTrading: inSndTrading.checked
+    }));
     var _d = load();
     var _av = parseInt(inAllTime.value);
     if (!isNaN(_av) && _av >= 0) { _d.stockAllTimeBase = _av; _d.stockAllTimeBaseAt = (_d.stockEntries || []).length; save(_d); }
@@ -1361,6 +1459,10 @@ function fmtBoxLabel(s) {
     toast('settings saved');
   });
   btnCancel.addEventListener('click', function() { panel.style.display = 'none'; });
+
+  if (btnSndTest) btnSndTest.addEventListener('click', function() {
+    Sound.preview({ on: true, style: inSndStyle.value, distinct: inSndDistinct.checked, vol: (parseInt(inSndVol.value)||0)/100, cats: { tasks: true, stock: true, trading: true } }, 'do');
+  });
 
   var btnRecalc = document.getElementById('btn-recalc-tasks');
   if (btnRecalc) btnRecalc.addEventListener('click', function() {

@@ -316,28 +316,38 @@
   .sw-card {
     background: var(--bg2); border: 0.5px solid var(--border);
     border-radius: var(--radius); padding: 0.875rem 1rem;
-    display: flex; flex-direction: column; gap: 7px;
+    display: flex; flex-direction: column; gap: 9px;
   }
-  .sw-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .sw-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
   .sw-name {
     font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--ink);
     cursor: pointer; border-bottom: 1px dashed var(--ink3);
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70%;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%;
     -webkit-tap-highlight-color: transparent;
   }
-  .sw-reset {
-    background: var(--bg); border: 0.5px solid var(--border); border-radius: 8px;
-    color: var(--ink2); font-size: 11px; letter-spacing: 0.04em; padding: 7px 12px;
-    cursor: pointer; font-family: 'DM Mono', monospace; -webkit-tap-highlight-color: transparent;
-    -webkit-appearance: none; appearance: none; white-space: nowrap;
-  }
-  .sw-reset:active { transform: scale(0.97); }
+  .sw-best-inline { font-size: 11px; color: var(--ink3); white-space: nowrap; }
+  .sw-best-inline strong { color: var(--ink2); font-weight: 500; }
   .sw-time {
     font-family: 'DM Mono', monospace; font-size: 1.9rem; font-weight: 500;
     color: var(--ink); letter-spacing: 0.02em; line-height: 1;
   }
-  .sw-best { font-size: 11px; color: var(--ink3); }
-  .sw-best strong { color: var(--ink2); font-weight: 500; }
+  .sw-time.running { color: var(--try); }
+  .sw-controls { display: flex; gap: 8px; }
+  .sw-btn {
+    flex: 1; background: var(--bg); border: 0.5px solid var(--border); border-radius: 9px;
+    color: var(--ink2); font-size: 11px; letter-spacing: 0.04em; padding: 9px 6px;
+    cursor: pointer; font-family: 'DM Mono', monospace; -webkit-tap-highlight-color: transparent;
+    -webkit-appearance: none; appearance: none; white-space: nowrap;
+  }
+  .sw-btn:active { transform: scale(0.97); }
+  .sw-btn.primary { color: var(--try); border-color: rgba(74,222,154,0.4); }
+  .sw-lboards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .sw-lb-label { font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink3); margin-bottom: 5px; }
+  .sw-lb-rows { display: flex; flex-direction: column; gap: 3px; }
+  .sw-lb-row { display: flex; justify-content: space-between; font-size: 11px; }
+  .sw-lb-row .v { color: var(--ink2); }
+  .sw-lb-row .dt { color: var(--ink3); }
+  .sw-lb-empty { font-size: 11px; color: var(--ink3); }
 
   /* ── CAT REWARD ── */
   .cat-section { display: flex; flex-direction: column; gap: 10px; }
@@ -775,6 +785,19 @@
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button id="btn-settings-save" style="flex:1;background:var(--trade);border:none;border-radius:10px;color:#fff;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.06em;padding:12px;cursor:pointer;">Save</button>
       <button id="btn-settings-cancel" style="flex:1;background:none;border:0.5px solid var(--border);border-radius:10px;color:var(--ink3);font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.06em;padding:12px;cursor:pointer;">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── STOPWATCH START-TIME EDITOR ── -->
+<div id="sw-edit-modal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
+  <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:1.5rem;width:88%;max-width:340px;display:flex;flex-direction:column;gap:1rem;">
+    <div id="sw-edit-title" style="font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--ink);">Start time</div>
+    <div style="font-size:11px;color:var(--ink3);line-height:1.6;">Set when this watch started. It will run from this moment.</div>
+    <input id="sw-edit-input" type="datetime-local" style="background:var(--bg);border:0.5px solid var(--border);border-radius:8px;color:var(--ink);font-family:'DM Mono',monospace;font-size:13px;padding:10px;color-scheme:dark;">
+    <div style="display:flex;gap:8px;">
+      <button id="sw-edit-save" style="flex:1;background:var(--trade);border:none;border-radius:10px;color:#fff;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.06em;padding:12px;cursor:pointer;">Save</button>
+      <button id="sw-edit-cancel" style="flex:1;background:none;border:0.5px solid var(--border);border-radius:10px;color:var(--ink3);font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.06em;padding:12px;cursor:pointer;">Cancel</button>
     </div>
   </div>
 </div>
@@ -1616,50 +1639,83 @@ window.simOverlay = makeOverlay({
 
 
 // ══════════════════════════════════════════════════════════════════
-// STOPWATCHES — 4 count-up timers. Run nonstop from last reset (real
-// wall-clock, even while the app is closed). Reset banks the run as
-// "best" if it beat the record. Names are editable.
+// STOPWATCHES — 4 timers. Idle until you Start. Start/Pause/Reset plus
+// an editable start time. Reset banks the run into the watch's history
+// (used for best / top 3 / worst 3). Names are editable.
 // ══════════════════════════════════════════════════════════════════
 (function () {
   var listEl = document.getElementById('sw-list');
   if (!listEl) return;
+  var editModal = document.getElementById('sw-edit-modal');
+  var editInput = document.getElementById('sw-edit-input');
+  var editTitle = document.getElementById('sw-edit-title');
+  var editSave = document.getElementById('sw-edit-save');
+  var editCancel = document.getElementById('sw-edit-cancel');
+  var editingIndex = -1;
 
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
   function fmtDur(ms) {
     var s = Math.floor((ms || 0) / 1000);
     var d = Math.floor(s / 86400); s -= d * 86400;
     var h = Math.floor(s / 3600); s -= h * 3600;
     var m = Math.floor(s / 60); var sec = s - m * 60;
-    var p = function (n) { return (n < 10 ? '0' : '') + n; };
-    return (d > 0 ? d + 'd ' : '') + p(h) + ':' + p(m) + ':' + p(sec);
+    return (d > 0 ? d + 'd ' : '') + pad(h) + ':' + pad(m) + ':' + pad(sec);
   }
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
   }
+  function shortDate(ts) { return ts ? new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''; }
+  function elapsed(sw) { return (sw.accumulated || 0) + (sw.running && sw.startedAt ? (Date.now() - sw.startedAt) : 0); }
+  function makeWatch(name) { return { name: name, running: false, startedAt: null, accumulated: 0, best: 0, runs: [] }; }
 
   function init() {
-    var d = load();
+    var d = load(); var changed = false;
     if (!Array.isArray(d.stopwatches) || d.stopwatches.length < 4) {
       d.stopwatches = [];
-      for (var i = 0; i < 4; i++) {
-        d.stopwatches.push({ name: 'Stopwatch ' + (i + 1), startedAt: Date.now(), best: 0, lastRun: 0 });
-      }
-      save(d);
+      for (var i = 0; i < 4; i++) d.stopwatches.push(makeWatch('Stopwatch ' + (i + 1)));
+      changed = true;
+    } else {
+      d.stopwatches.forEach(function (sw) {
+        // Migrate older (auto-running) watches to idle, preserving name + best
+        if (sw.running === undefined) { sw.running = false; sw.startedAt = null; sw.accumulated = 0; changed = true; }
+        if (sw.accumulated === undefined) { sw.accumulated = 0; changed = true; }
+        if (!('startedAt' in sw)) { sw.startedAt = null; changed = true; }
+        if (!Array.isArray(sw.runs)) { sw.runs = []; changed = true; }
+        if (typeof sw.best !== 'number') { sw.best = 0; changed = true; }
+      });
     }
+    if (changed) save(d);
+  }
+
+  function lbRows(runs, asc) {
+    var arr = (runs || []).slice().sort(function (a, b) { return asc ? a.ms - b.ms : b.ms - a.ms; }).slice(0, 3);
+    if (!arr.length) return '<div class="sw-lb-empty">—</div>';
+    return arr.map(function (r) {
+      return '<div class="sw-lb-row"><span class="v">' + fmtDur(r.ms) + '</span><span class="dt">' + shortDate(r.ts) + '</span></div>';
+    }).join('');
   }
 
   function build() {
     var d = load();
     listEl.innerHTML = d.stopwatches.map(function (sw, i) {
+      var run = sw.running;
       return '<div class="sw-card">' +
         '<div class="sw-top">' +
           '<span class="sw-name" data-i="' + i + '">' + escapeHtml(sw.name) + '</span>' +
-          '<button class="sw-reset" data-i="' + i + '">↺ reset</button>' +
+          '<span class="sw-best-inline">best <strong>' + fmtDur(sw.best || 0) + '</strong></span>' +
         '</div>' +
-        '<div class="sw-time" id="sw-time-' + i + '">00:00:00</div>' +
-        '<div class="sw-best">best <strong>' + fmtDur(sw.best || 0) + '</strong>' +
-          (sw.lastRun ? ' · last ' + fmtDur(sw.lastRun) : '') + '</div>' +
+        '<div class="sw-time' + (run ? ' running' : '') + '" id="sw-time-' + i + '">' + fmtDur(elapsed(sw)) + '</div>' +
+        '<div class="sw-controls">' +
+          '<button class="sw-btn sw-startpause' + (run ? '' : ' primary') + '" data-i="' + i + '">' + (run ? '⏸ pause' : '▶ start') + '</button>' +
+          '<button class="sw-btn sw-reset" data-i="' + i + '">↺ reset</button>' +
+          '<button class="sw-btn sw-edit" data-i="' + i + '">✎ time</button>' +
+        '</div>' +
+        '<div class="sw-lboards">' +
+          '<div><div class="sw-lb-label">top 3</div><div class="sw-lb-rows">' + lbRows(sw.runs, false) + '</div></div>' +
+          '<div><div class="sw-lb-label">worst 3</div><div class="sw-lb-rows">' + lbRows(sw.runs, true) + '</div></div>' +
+        '</div>' +
       '</div>';
     }).join('');
     tick();
@@ -1668,23 +1724,36 @@ window.simOverlay = makeOverlay({
   function tick() {
     var d = load();
     if (!d.stopwatches) return;
-    var now = Date.now();
     d.stopwatches.forEach(function (sw, i) {
       var el = document.getElementById('sw-time-' + i);
-      if (el) el.textContent = fmtDur(now - (sw.startedAt || now));
+      if (el) el.textContent = fmtDur(elapsed(sw));
     });
+  }
+
+  function startPause(i) {
+    var d = load(); var sw = d.stopwatches[i]; if (!sw) return;
+    if (sw.running) {
+      sw.accumulated = (sw.accumulated || 0) + (Date.now() - (sw.startedAt || Date.now()));
+      sw.startedAt = null; sw.running = false;
+    } else {
+      sw.startedAt = Date.now(); sw.running = true;
+    }
+    save(d); build();
+    if (navigator.vibrate) navigator.vibrate(8);
   }
 
   function resetWatch(i) {
     var d = load(); var sw = d.stopwatches[i]; if (!sw) return;
-    var run = Date.now() - (sw.startedAt || Date.now());
-    if (!confirm('Reset "' + sw.name + '"? It ran ' + fmtDur(run) + '. Your best is kept.')) return;
+    var run = elapsed(sw);
+    if (run < 1000) { sw.accumulated = 0; sw.startedAt = null; sw.running = false; save(d); build(); return; }
+    if (!confirm('Reset "' + sw.name + '"? It ran ' + fmtDur(run) + '. This run is saved to the watch\u2019s history.')) return;
+    if (!Array.isArray(sw.runs)) sw.runs = [];
+    sw.runs.push({ ms: run, ts: new Date().toISOString() });
     if (run > (sw.best || 0)) sw.best = run;
-    sw.lastRun = run;
-    sw.startedAt = Date.now();
+    sw.accumulated = 0; sw.startedAt = null; sw.running = false;
     save(d); build();
     if (navigator.vibrate) navigator.vibrate(12);
-    toast('reset — ran ' + fmtDur(run));
+    toast('saved — ran ' + fmtDur(run));
   }
 
   function renameWatch(i) {
@@ -1697,12 +1766,41 @@ window.simOverlay = makeOverlay({
     save(d); build();
   }
 
+  function toLocalInput(ms) {
+    var dt = new Date(ms);
+    return dt.getFullYear() + '-' + pad(dt.getMonth() + 1) + '-' + pad(dt.getDate()) + 'T' + pad(dt.getHours()) + ':' + pad(dt.getMinutes());
+  }
+  function openEdit(i) {
+    var d = load(); var sw = d.stopwatches[i]; if (!sw) return;
+    editingIndex = i;
+    editInput.value = toLocalInput(Date.now() - elapsed(sw));
+    if (editTitle) editTitle.textContent = 'Start time · ' + sw.name;
+    editModal.style.display = 'flex';
+  }
+  function saveEdit() {
+    if (editingIndex < 0) { editModal.style.display = 'none'; return; }
+    var d = load(); var sw = d.stopwatches[editingIndex];
+    if (sw && editInput.value) {
+      var ms = new Date(editInput.value).getTime();
+      if (!isNaN(ms)) {
+        if (ms > Date.now()) ms = Date.now();
+        sw.startedAt = ms; sw.accumulated = 0; sw.running = true;
+        save(d); build(); toast('start time set');
+      }
+    }
+    editModal.style.display = 'none'; editingIndex = -1;
+  }
+
   listEl.addEventListener('click', function (e) {
-    var rb = e.target.closest ? e.target.closest('.sw-reset') : null;
-    if (rb) { resetWatch(+rb.getAttribute('data-i')); return; }
-    var nm = e.target.closest ? e.target.closest('.sw-name') : null;
-    if (nm) { renameWatch(+nm.getAttribute('data-i')); return; }
+    if (!e.target.closest) return;
+    var b;
+    if ((b = e.target.closest('.sw-startpause'))) { startPause(+b.getAttribute('data-i')); return; }
+    if ((b = e.target.closest('.sw-reset'))) { resetWatch(+b.getAttribute('data-i')); return; }
+    if ((b = e.target.closest('.sw-edit'))) { openEdit(+b.getAttribute('data-i')); return; }
+    if ((b = e.target.closest('.sw-name'))) { renameWatch(+b.getAttribute('data-i')); return; }
   });
+  if (editSave) editSave.addEventListener('click', saveEdit);
+  if (editCancel) editCancel.addEventListener('click', function () { editModal.style.display = 'none'; editingIndex = -1; });
 
   init();
   build();

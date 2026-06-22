@@ -312,6 +312,37 @@
   .cal-legend span { display: flex; align-items: center; gap: 5px; }
   .cal-dot { width: 10px; height: 10px; border-radius: 3px; }
 
+  /* ── TABS ── */
+  .tabbar { display: flex; gap: 6px; background: var(--bg2); border: 0.5px solid var(--border); border-radius: 12px; padding: 4px; }
+  .tabbtn {
+    flex: 1; background: none; border: none; border-radius: 9px; padding: 9px;
+    color: var(--ink3); font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 0.06em;
+    cursor: pointer; -webkit-tap-highlight-color: transparent; -webkit-appearance: none; appearance: none;
+  }
+  .tabbtn.active { background: var(--bg); color: var(--ink); }
+
+  /* ── ACHIEVEMENTS ── */
+  .ach-field { margin-bottom: 1.5rem; }
+  .ach-lboards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 8px 0 12px; }
+  .ach-scroll { max-height: 300px; overflow-y: auto; }
+  .ach-list { display: flex; flex-direction: column; gap: 5px; }
+  .ach-row {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg2); border: 0.5px solid var(--border); border-radius: 10px;
+    padding: 0.45rem 0.7rem; font-size: 12px;
+  }
+  .ach-row .ach-date { color: var(--ink3); flex: 1; }
+  .ach-row input {
+    width: 92px; background: var(--bg); border: 0.5px solid var(--border); border-radius: 7px;
+    color: var(--ink); font-family: 'DM Mono', monospace; font-size: 12px; padding: 5px 8px; text-align: right;
+    -webkit-appearance: none; appearance: none;
+  }
+  .ach-row .ach-del {
+    background: none; border: none; color: var(--fail); font-size: 13px; cursor: pointer;
+    padding: 0 4px; -webkit-tap-highlight-color: transparent;
+  }
+  .ach-empty { font-size: 12px; color: var(--ink3); text-align: center; padding: 1rem 0; }
+
   /* ── LIVE DASHBOARD ── */
   .task-quick { display: flex; gap: 8px; }
   .qbtn {
@@ -343,6 +374,7 @@
     padding: 0 2px; -webkit-tap-highlight-color: transparent; line-height: 1;
   }
   .counter-reset:active { color: var(--ink); }
+  .counter-actions { display: flex; gap: 8px; }
   .counter-val {
     font-family: 'DM Mono', monospace; font-weight: 500; color: var(--ink);
     font-size: 1.7rem; letter-spacing: 0.01em; line-height: 1.1; margin-top: 4px;
@@ -542,6 +574,13 @@
     <button id="btn-settings-open" style="position:absolute;top:0;right:0;background:none;border:0.5px solid var(--border);border-radius:8px;color:var(--ink3);font-size:11px;letter-spacing:0.06em;padding:5px 10px;cursor:pointer;font-family:'DM Mono',monospace;">⚙ timers</button>
   </div>
 
+  <div class="tabbar">
+    <button class="tabbtn active" data-tab="tracker">Tracker</button>
+    <button class="tabbtn" data-tab="achievements">Achievements</button>
+  </div>
+
+  <div id="tab-tracker">
+
   <!-- ============ LIVE DASHBOARD ============ -->
   <div class="task-quick">
     <button class="qbtn try" id="btn-try"><span class="ql">Try</span><span class="qp">+1</span></button>
@@ -552,12 +591,12 @@
 
   <div class="counters">
     <div class="counter-card">
-      <div class="counter-head"><span class="counter-label">Day counter</span><button class="counter-reset" id="day-counter-reset">↺</button></div>
+      <div class="counter-head"><span class="counter-label">Day counter</span><span class="counter-actions"><button class="counter-reset" id="day-counter-edit">✎</button><button class="counter-reset" id="day-counter-reset">↺</button></span></div>
       <div class="counter-val" id="day-counter-val">0.0000</div>
     </div>
     <div class="counter-card">
-      <div class="counter-head"><span class="counter-label">Counter</span><button class="counter-reset" id="big-counter-reset">↺</button></div>
-      <div class="counter-val big" id="big-counter-val">50,000,000.0000</div>
+      <div class="counter-head"><span class="counter-label">Counter</span><span class="counter-actions"><button class="counter-reset" id="big-counter-edit">✎</button><button class="counter-reset" id="big-counter-reset">↺</button></span></div>
+      <div class="counter-val big" id="big-counter-val">50,000,000</div>
     </div>
   </div>
 
@@ -589,16 +628,6 @@
         <div class="stat-num" style="color:var(--fail);" id="best-fail-count">0</div>
         <div class="stat-meta" id="best-fail-date">—</div>
       </div>
-    </div>
-  </div>
-  <div class="stats" style="grid-template-columns:1fr 1fr;">
-    <div class="stat-card">
-      <div class="stat-label">Best 3 days</div>
-      <div class="mini-rows" id="task-best3"></div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Worst 3 days</div>
-      <div class="mini-rows" id="task-worst3"></div>
     </div>
   </div>
   <div class="pace tasks" id="task-pace">
@@ -650,10 +679,6 @@
       <div class="stat-num" style="font-size:2rem;color:var(--stock);" id="stock-alltime">0</div>
       <div class="stat-meta">simulations</div>
     </div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-label">Top 3 days · most sims</div>
-    <div class="mini-rows" id="stock-top3"></div>
   </div>
   <button class="action-btn full" id="btn-undo-stock">↩ undo last sim</button>
 
@@ -793,6 +818,16 @@
   </div>
   <div id="sw-list" style="display:flex;flex-direction:column;gap:10px;"></div>
 
+  </div><!-- /tab-tracker -->
+
+  <div id="tab-achievements" style="display:none;">
+    <div class="sec-head" style="margin-bottom:0.5rem;">
+      <span class="sec-title">Achievements</span>
+      <span class="sec-sub">top &amp; worst days · tap a value to edit</span>
+    </div>
+    <div id="ach-content"></div>
+  </div>
+
 </div>
 
 <!-- ── SETTINGS PANEL ── -->
@@ -862,6 +897,20 @@
     <div style="display:flex;gap:8px;">
       <button id="sw-edit-save" style="flex:1;background:var(--trade);border:none;border-radius:10px;color:#fff;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.06em;padding:12px;cursor:pointer;">Save</button>
       <button id="sw-edit-cancel" style="flex:1;background:none;border:0.5px solid var(--border);border-radius:10px;color:var(--ink3);font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.06em;padding:12px;cursor:pointer;">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── COUNTER EDITOR ── -->
+<div id="counter-edit-modal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
+  <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:1.5rem;width:88%;max-width:340px;display:flex;flex-direction:column;gap:1rem;">
+    <div id="counter-edit-title" style="font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--ink);">Edit</div>
+    <div id="counter-edit-sub" style="font-size:11px;color:var(--ink3);line-height:1.6;"></div>
+    <input id="counter-edit-datetime" type="datetime-local" style="background:var(--bg);border:0.5px solid var(--border);border-radius:8px;color:var(--ink);font-family:'DM Mono',monospace;font-size:13px;padding:10px;color-scheme:dark;display:none;">
+    <input id="counter-edit-number" type="text" inputmode="decimal" style="background:var(--bg);border:0.5px solid var(--border);border-radius:8px;color:var(--ink);font-family:'DM Mono',monospace;font-size:15px;padding:10px;text-align:right;display:none;">
+    <div style="display:flex;gap:8px;">
+      <button id="counter-edit-save" style="flex:1;background:var(--trade);border:none;border-radius:10px;color:#fff;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.06em;padding:12px;cursor:pointer;">Save</button>
+      <button id="counter-edit-cancel" style="flex:1;background:none;border:0.5px solid var(--border);border-radius:10px;color:var(--ink3);font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.06em;padding:12px;cursor:pointer;">Cancel</button>
     </div>
   </div>
 </div>
@@ -949,6 +998,7 @@ function fresh() {
     stockAllTimeBase: null, stockAllTimeBaseAt: null,
     dayColors: {}, ratingStart: null, stopwatches: [],
     dayCounter: null, bigCounter: null,
+    statOverrides: { tasks: {}, stock: {}, trading: {} },
     streak: 0, lastDate: null,
     stockStreak: 0, stockLastDate: null,
     tradeStreak: 0, tradeLastDate: null
@@ -1071,12 +1121,6 @@ function render() {
   _el = document.getElementById('stock-best-day-btn-date'); if (_el) _el.textContent = d.stockBest.date
     ? new Date(d.stockBest.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—';
   _el = document.getElementById('stock-alltime'); if (_el) _el.textContent = allTimeSims(d);
-
-  // Leaderboards
-  var _taskMap = dailyTotals(d.entries, true);
-  renderMiniRows('task-best3', topDays(_taskMap, 3, false), ' pts');
-  renderMiniRows('task-worst3', topDays(_taskMap, 3, true), ' pts');
-  renderMiniRows('stock-top3', topDays(dailyTotals(d.stockEntries, false), 3, false), '');
 
   // Trading
   const rp = tradePtsToday(d);
@@ -1903,7 +1947,7 @@ window.simOverlay = makeOverlay({
     var d = load(); var changed = false;
     if (!d.dayCounter || !d.dayCounter.startedAt) { d.dayCounter = { startedAt: Date.now() }; changed = true; }
     if (!d.bigCounter || d.bigCounter.base == null) {
-      d.bigCounter = { base: 50000000, startedAt: Date.now(), dailyAmount: randInt(50, 120), lastDay: todayKey() };
+      d.bigCounter = { base: 50000000, startedAt: Date.now(), dailyAmount: randInt(50000000, 120000000), lastDay: todayKey() };
       changed = true;
     }
     if (changed) save(d);
@@ -1920,7 +1964,7 @@ window.simOverlay = makeOverlay({
     if (bc.lastDay !== todayKey()) {
       bc.base = bigValue(d);
       bc.startedAt = Date.now();
-      bc.dailyAmount = randInt(50, 120);
+      bc.dailyAmount = randInt(50000000, 120000000);
       bc.lastDay = todayKey();
       save(d);
     }
@@ -1936,7 +1980,7 @@ window.simOverlay = makeOverlay({
 
     var days = (Date.now() - d.dayCounter.startedAt) / 86400000;
     dayEl.textContent = fmtNum(days, 4);
-    bigEl.textContent = fmtNum(bigValue(d), 4);
+    bigEl.textContent = fmtNum(bigValue(d), 0);
 
     if (mirror) {
       var act = (d.stopwatches || []).filter(function (sw) { return sw.running; });
@@ -1958,12 +2002,159 @@ window.simOverlay = makeOverlay({
   var bigReset = document.getElementById('big-counter-reset');
   if (bigReset) bigReset.addEventListener('click', function () {
     if (!confirm('Reset the counter back to 50,000,000?')) return;
-    var d = load(); d.bigCounter = { base: 50000000, startedAt: Date.now(), dailyAmount: randInt(50, 120), lastDay: todayKey() }; save(d); tick(); toast('counter reset to 50,000,000');
+    var d = load(); d.bigCounter = { base: 50000000, startedAt: Date.now(), dailyAmount: randInt(50000000, 120000000), lastDay: todayKey() }; save(d); tick(); toast('counter reset to 50,000,000');
   });
+
+  // ── Editable starts ──
+  var ceModal = document.getElementById('counter-edit-modal');
+  var ceTitle = document.getElementById('counter-edit-title');
+  var ceSub = document.getElementById('counter-edit-sub');
+  var ceDate = document.getElementById('counter-edit-datetime');
+  var ceNum = document.getElementById('counter-edit-number');
+  var ceSave = document.getElementById('counter-edit-save');
+  var ceCancel = document.getElementById('counter-edit-cancel');
+  var ceMode = null;
+
+  function toLocalInput(ms) {
+    var dt = new Date(ms);
+    return dt.getFullYear() + '-' + pad(dt.getMonth() + 1) + '-' + pad(dt.getDate()) + 'T' + pad(dt.getHours()) + ':' + pad(dt.getMinutes());
+  }
+  function openDayEdit() {
+    var d = load(); ceMode = 'day';
+    ceTitle.textContent = 'Day counter — start';
+    ceSub.textContent = 'Set when the day counter began. Backdate it to show more days; the count updates to match.';
+    ceDate.value = toLocalInput(d.dayCounter ? d.dayCounter.startedAt : Date.now());
+    ceDate.style.display = ''; ceNum.style.display = 'none';
+    ceModal.style.display = 'flex';
+  }
+  function openBigEdit() {
+    var d = load(); ceMode = 'big';
+    ceTitle.textContent = 'Counter — value';
+    ceSub.textContent = 'Set the counter to any number. It keeps rising from there.';
+    ceNum.value = Math.round(bigValue(d)).toLocaleString('en-US');
+    ceNum.style.display = ''; ceDate.style.display = 'none';
+    ceModal.style.display = 'flex';
+  }
+  function saveCounterEdit() {
+    var d = load();
+    if (ceMode === 'day' && ceDate.value) {
+      var ms = new Date(ceDate.value).getTime();
+      if (!isNaN(ms)) { if (ms > Date.now()) ms = Date.now(); d.dayCounter = { startedAt: ms }; save(d); toast('day counter start set'); }
+    } else if (ceMode === 'big') {
+      var v = parseFloat(ceNum.value.replace(/,/g, '').trim());
+      if (!isNaN(v)) {
+        if (!d.bigCounter) d.bigCounter = { dailyAmount: randInt(50000000, 120000000), lastDay: todayKey() };
+        d.bigCounter.base = v; d.bigCounter.startedAt = Date.now();
+        if (d.bigCounter.dailyAmount == null) d.bigCounter.dailyAmount = randInt(50000000, 120000000);
+        if (d.bigCounter.lastDay == null) d.bigCounter.lastDay = todayKey();
+        save(d); toast('counter value set');
+      }
+    }
+    ceModal.style.display = 'none'; ceMode = null; tick();
+  }
+  if (ceSave) ceSave.addEventListener('click', saveCounterEdit);
+  if (ceCancel) ceCancel.addEventListener('click', function () { ceModal.style.display = 'none'; ceMode = null; });
+  var dayEdit = document.getElementById('day-counter-edit');
+  if (dayEdit) dayEdit.addEventListener('click', openDayEdit);
+  var bigEdit = document.getElementById('big-counter-edit');
+  if (bigEdit) bigEdit.addEventListener('click', openBigEdit);
 
   ensureInit();
   tick();
   setInterval(tick, 250);
+})();
+
+
+// ══════════════════════════════════════════════════════════════════
+// ACHIEVEMENTS TAB — top 3 / worst 3 per field + editable/deletable day
+// records. Edits are stored as per-date overrides so live tracking is
+// never corrupted.
+// ══════════════════════════════════════════════════════════════════
+function ensureOverrides(d) {
+  if (!d.statOverrides) d.statOverrides = {};
+  ['tasks', 'stock', 'trading'].forEach(function (f) { if (!d.statOverrides[f]) d.statOverrides[f] = {}; });
+  return d;
+}
+function fieldArr(d, field) {
+  if (field === 'tasks') return { arr: d.entries || [], byPts: true };
+  if (field === 'stock') return { arr: d.stockEntries || [], byPts: false };
+  return { arr: d.tradeEntries || [], byPts: true };
+}
+function fieldDaily(d, field) {
+  var fa = fieldArr(d, field);
+  var m = dailyTotals(fa.arr, fa.byPts);
+  var ov = (d.statOverrides && d.statOverrides[field]) || {};
+  Object.keys(ov).forEach(function (date) { if (ov[date] === null) delete m[date]; else m[date] = ov[date]; });
+  return m;
+}
+function renderAchievements() {
+  var host = document.getElementById('ach-content');
+  if (!host) return;
+  var d = load();
+  var fields = [['tasks', 'Tasks', 'pts'], ['stock', 'Stock sims', 'sims'], ['trading', 'Trading', 'pts']];
+  function shortDate(dt) { return new Date(dt + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
+  function longDate(dt) { return new Date(dt + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
+  function lb(rows) {
+    if (!rows.length) return '<div class="mini-empty">no days yet</div>';
+    return rows.map(function (r) { return '<div class="mini-row"><span class="mr-date">' + shortDate(r.date) + '</span><span class="mr-val">' + r.val + '</span></div>'; }).join('');
+  }
+  host.innerHTML = fields.map(function (f) {
+    var key = f[0], label = f[1], unit = f[2];
+    var map = fieldDaily(d, key);
+    var days = Object.keys(map).map(function (dt) { return { date: dt, val: map[dt] }; }).sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+    var rowsHtml = days.length ? days.map(function (r) {
+      return '<div class="ach-row"><span class="ach-date">' + longDate(r.date) + '</span>' +
+        '<input type="text" inputmode="numeric" value="' + r.val + '" data-field="' + key + '" data-date="' + r.date + '">' +
+        '<button class="ach-del" data-field="' + key + '" data-date="' + r.date + '">✕</button></div>';
+    }).join('') : '<div class="ach-empty">no days recorded</div>';
+    return '<div class="ach-field">' +
+      '<div class="sec-head"><span class="sec-title">' + label + '</span><span class="sec-sub">' + unit + ' / day</span></div>' +
+      '<div class="ach-lboards">' +
+        '<div class="stat-card"><div class="stat-label">Top 3 days</div><div class="mini-rows">' + lb(topDays(map, 3, false)) + '</div></div>' +
+        '<div class="stat-card"><div class="stat-label">Worst 3 days</div><div class="mini-rows">' + lb(topDays(map, 3, true)) + '</div></div>' +
+      '</div>' +
+      '<div class="ach-scroll"><div class="ach-list">' + rowsHtml + '</div></div>' +
+    '</div>';
+  }).join('');
+}
+window.renderAchievements = renderAchievements;
+
+(function () {
+  var host = document.getElementById('ach-content');
+  if (host) {
+    host.addEventListener('change', function (e) {
+      var inp = e.target;
+      if (inp && inp.tagName === 'INPUT' && inp.getAttribute('data-field')) {
+        var field = inp.getAttribute('data-field'), date = inp.getAttribute('data-date');
+        var v = parseInt(String(inp.value).replace(/[^0-9-]/g, ''), 10);
+        if (isNaN(v)) { renderAchievements(); return; }
+        var d = load(); ensureOverrides(d);
+        d.statOverrides[field][date] = v; save(d); render(); renderAchievements();
+        toast('updated');
+      }
+    });
+    host.addEventListener('click', function (e) {
+      var btn = e.target.closest ? e.target.closest('.ach-del') : null;
+      if (!btn) return;
+      var field = btn.getAttribute('data-field'), date = btn.getAttribute('data-date');
+      if (!confirm('Delete this day from ' + field + '?')) return;
+      var d = load(); ensureOverrides(d);
+      d.statOverrides[field][date] = null; save(d); render(); renderAchievements();
+      toast('deleted');
+    });
+  }
+
+  var tracker = document.getElementById('tab-tracker');
+  var ach = document.getElementById('tab-achievements');
+  var btns = document.querySelectorAll('.tabbtn');
+  function show(name) {
+    if (tracker) tracker.style.display = name === 'tracker' ? '' : 'none';
+    if (ach) ach.style.display = name === 'achievements' ? '' : 'none';
+    btns.forEach(function (b) { b.classList.toggle('active', b.getAttribute('data-tab') === name); });
+    if (name === 'achievements') renderAchievements();
+    window.scrollTo(0, 0);
+  }
+  btns.forEach(function (b) { b.addEventListener('click', function () { show(b.getAttribute('data-tab')); }); });
 })();
 
 

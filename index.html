@@ -420,6 +420,7 @@
   }
   .sw-btn:active { transform: scale(0.97); }
   .sw-btn.primary { color: var(--try); border-color: rgba(74,222,154,0.4); }
+  .sw-btn.sw-del { flex: 0 0 auto; padding: 9px 11px; color: var(--fail); border-color: rgba(248,113,113,0.3); }
   .sw-lboards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .sw-lb-label { font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink3); margin-bottom: 5px; }
   .sw-lb-rows { display: flex; flex-direction: column; gap: 3px; }
@@ -588,6 +589,18 @@
     <button class="qbtn fail" id="btn-fail"><span class="ql">Fail</span><span class="qp">+1</span></button>
   </div>
   <button class="action-btn full" id="btn-undo-task">↩ undo last task</button>
+
+  <!-- ============ CUSTOM GROUP ============ -->
+  <div class="sec-head" style="margin-top:2px;">
+    <span class="sec-title" id="cg-name">Default</span>
+    <button class="counter-reset" id="cg-edit" style="font-size:13px;">✎</button>
+  </div>
+  <div class="task-quick">
+    <button class="qbtn try" id="cg-b0"><span class="ql" id="cg-l0">Try</span><span class="qp" id="cg-c0">0</span></button>
+    <button class="qbtn do" id="cg-b1"><span class="ql" id="cg-l1">Do</span><span class="qp" id="cg-c1">0</span></button>
+    <button class="qbtn fail" id="cg-b2"><span class="ql" id="cg-l2">Fail</span><span class="qp" id="cg-c2">0</span></button>
+  </div>
+  <button class="action-btn full" id="cg-undo">↩ undo last</button>
 
   <div class="counters">
     <div class="counter-card">
@@ -817,6 +830,7 @@
     <span class="sec-sub">tap name to rename</span>
   </div>
   <div id="sw-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+  <button class="action-btn full" id="sw-add" style="margin-top:2px;">+ add stopwatch</button>
 
   </div><!-- /tab-tracker -->
 
@@ -925,6 +939,22 @@
   </div>
 </div>
 
+<!-- ── CUSTOM GROUP EDITOR ── -->
+<div id="cg-edit-modal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
+  <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:1.5rem;width:88%;max-width:340px;display:flex;flex-direction:column;gap:0.85rem;">
+    <div style="font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--ink);">Edit group</div>
+    <div style="font-size:11px;color:var(--ink3);line-height:1.6;">Rename the group and its three buttons.</div>
+    <input id="cg-edit-name" placeholder="Group name" style="background:var(--bg);border:0.5px solid var(--border);border-radius:8px;color:var(--ink);font-family:'DM Mono',monospace;font-size:13px;padding:10px;">
+    <input id="cg-edit-l0" placeholder="Button 1" style="background:var(--bg);border:0.5px solid var(--border);border-radius:8px;color:var(--try);font-family:'DM Mono',monospace;font-size:13px;padding:10px;">
+    <input id="cg-edit-l1" placeholder="Button 2" style="background:var(--bg);border:0.5px solid var(--border);border-radius:8px;color:var(--do);font-family:'DM Mono',monospace;font-size:13px;padding:10px;">
+    <input id="cg-edit-l2" placeholder="Button 3" style="background:var(--bg);border:0.5px solid var(--border);border-radius:8px;color:var(--fail);font-family:'DM Mono',monospace;font-size:13px;padding:10px;">
+    <div style="display:flex;gap:8px;">
+      <button id="cg-edit-save" style="flex:1;background:var(--trade);border:none;border-radius:10px;color:#fff;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.06em;padding:12px;cursor:pointer;">Save</button>
+      <button id="cg-edit-cancel" style="flex:1;background:none;border:0.5px solid var(--border);border-radius:10px;color:var(--ink3);font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.06em;padding:12px;cursor:pointer;">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── COUNTER EDITOR ── -->
 <div id="counter-edit-modal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
   <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:1.5rem;width:88%;max-width:340px;display:flex;flex-direction:column;gap:1rem;">
@@ -1023,6 +1053,7 @@ function fresh() {
     dayColors: {}, ratingStart: null, stopwatches: [],
     dayCounter: null, bigCounter: null,
     statOverrides: { tasks: {}, stock: {}, trading: {} },
+    customGroup: { name: 'Default', labels: ['Try', 'Do', 'Fail'], entries: [] },
     streak: 0, lastDate: null,
     stockStreak: 0, stockLastDate: null,
     tradeStreak: 0, tradeLastDate: null
@@ -1347,7 +1378,7 @@ document.getElementById('import-file').addEventListener('change', function (ev) 
       const parsed = JSON.parse(reader.result);
       if (!Array.isArray(parsed.entries)) throw new Error('bad file');
       if (!confirm('Replace all current data with this backup? This cannot be undone.')) return;
-      save(Object.assign(fresh(), parsed)); render(); if (window.refreshCalendar) window.refreshCalendar(); if (window.refreshStopwatches) window.refreshStopwatches(); toast('backup imported');
+      save(Object.assign(fresh(), parsed)); render(); if (window.refreshCalendar) window.refreshCalendar(); if (window.refreshStopwatches) window.refreshStopwatches(); if (window.refreshCustomGroup) window.refreshCustomGroup(); toast('backup imported');
     } catch (e) { toast('could not read that file'); }
   };
   reader.readAsText(file); ev.target.value = '';
@@ -1922,6 +1953,7 @@ window.simOverlay = makeOverlay({
           '<button class="sw-btn sw-startpause' + (run ? '' : ' primary') + '" data-i="' + i + '">' + (run ? '⏸ pause' : '▶ start') + '</button>' +
           '<button class="sw-btn sw-reset" data-i="' + i + '">↺ reset</button>' +
           '<button class="sw-btn sw-edit" data-i="' + i + '">✎ time</button>' +
+          '<button class="sw-btn sw-del" data-i="' + i + '">✕</button>' +
         '</div>' +
         '<div class="sw-lboards">' +
           '<div><div class="sw-lb-label">top 3</div><div class="sw-lb-rows">' + lbRows(sw.runs, false) + '</div></div>' +
@@ -1977,6 +2009,19 @@ window.simOverlay = makeOverlay({
     save(d); build();
   }
 
+  function delWatch(i) {
+    var d = load(); if (!d.stopwatches || !d.stopwatches[i]) return;
+    if (!confirm('Delete "' + (d.stopwatches[i].name || 'this stopwatch') + '"? Its history is removed.')) return;
+    d.stopwatches.splice(i, 1); save(d); build();
+  }
+  function addWatch() {
+    var d = load(); if (!Array.isArray(d.stopwatches)) d.stopwatches = [];
+    if (d.stopwatches.length >= 12) { toast('max 12 stopwatches'); return; }
+    d.stopwatches.push(makeWatch('Stopwatch ' + (d.stopwatches.length + 1)));
+    save(d); build();
+    if (navigator.vibrate) navigator.vibrate(8);
+  }
+
   function toLocalInput(ms) {
     var dt = new Date(ms);
     return dt.getFullYear() + '-' + pad(dt.getMonth() + 1) + '-' + pad(dt.getDate()) + 'T' + pad(dt.getHours()) + ':' + pad(dt.getMinutes());
@@ -2008,10 +2053,13 @@ window.simOverlay = makeOverlay({
     if ((b = e.target.closest('.sw-startpause'))) { startPause(+b.getAttribute('data-i')); return; }
     if ((b = e.target.closest('.sw-reset'))) { resetWatch(+b.getAttribute('data-i')); return; }
     if ((b = e.target.closest('.sw-edit'))) { openEdit(+b.getAttribute('data-i')); return; }
+    if ((b = e.target.closest('.sw-del'))) { delWatch(+b.getAttribute('data-i')); return; }
     if ((b = e.target.closest('.sw-name'))) { renameWatch(+b.getAttribute('data-i')); return; }
   });
   if (editSave) editSave.addEventListener('click', saveEdit);
   if (editCancel) editCancel.addEventListener('click', function () { editModal.style.display = 'none'; editingIndex = -1; });
+  var addBtn = document.getElementById('sw-add');
+  if (addBtn) addBtn.addEventListener('click', addWatch);
 
   init();
   build();
@@ -2189,6 +2237,11 @@ function fieldDaily(d, field) {
   Object.keys(ov).forEach(function (date) { if (ov[date] === null) delete m[date]; else m[date] = ov[date]; });
   return m;
 }
+function cgDailyByIdx(d, idx) {
+  var m = {};
+  ((d.customGroup && d.customGroup.entries) || []).forEach(function (e) { if (e.idx === idx) m[e.date] = (m[e.date] || 0) + 1; });
+  return m;
+}
 function renderAchievements() {
   var host = document.getElementById('ach-content');
   if (!host) return;
@@ -2200,7 +2253,7 @@ function renderAchievements() {
     if (!rows.length) return '<div class="mini-empty">no days yet</div>';
     return rows.map(function (r) { return '<div class="mini-row"><span class="mr-date">' + shortDate(r.date) + '</span><span class="mr-val">' + r.val + '</span></div>'; }).join('');
   }
-  host.innerHTML = fields.map(function (f) {
+  var _achHtml = fields.map(function (f) {
     var key = f[0], label = f[1], unit = f[2];
     var map = fieldDaily(d, key);
     var days = Object.keys(map).map(function (dt) { return { date: dt, val: map[dt] }; }).sort(function (a, b) { return a.date < b.date ? 1 : -1; });
@@ -2218,6 +2271,24 @@ function renderAchievements() {
       '<div class="ach-scroll"><div class="ach-list">' + rowsHtml + '</div></div>' +
     '</div>';
   }).join('');
+
+  // custom group leaderboards
+  function escAch(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  if (d.customGroup) {
+    var cg = d.customGroup;
+    var sub = '';
+    for (var bi = 0; bi < 3; bi++) {
+      var cmap = cgDailyByIdx(d, bi);
+      sub += '<div class="stat-label" style="margin-top:10px;">' + escAch((cg.labels && cg.labels[bi]) || ['Try', 'Do', 'Fail'][bi]) + '</div>' +
+        '<div class="ach-lboards">' +
+          '<div class="stat-card"><div class="stat-label">Top 3</div><div class="mini-rows">' + lb(topDays(cmap, 3, false)) + '</div></div>' +
+          '<div class="stat-card"><div class="stat-label">Worst 3</div><div class="mini-rows">' + lb(topDays(cmap, 3, true)) + '</div></div>' +
+        '</div>';
+    }
+    _achHtml += '<div class="ach-field"><div class="sec-head"><span class="sec-title">' + escAch(cg.name || 'Default') + '</span><span class="sec-sub">per button / day</span></div>' + sub + '</div>';
+  }
+
+  host.innerHTML = _achHtml;
 }
 window.renderAchievements = renderAchievements;
 
@@ -2257,6 +2328,87 @@ window.renderAchievements = renderAchievements;
     window.scrollTo(0, 0);
   }
   btns.forEach(function (b) { b.addEventListener('click', function () { show(b.getAttribute('data-tab')); }); });
+})();
+
+
+// ══════════════════════════════════════════════════════════════════
+// CUSTOM GROUP — a second Try/Do/Fail-style group with an editable
+// name and editable button labels. Resets daily; per-button day
+// history powers the Achievements leaderboards.
+// ══════════════════════════════════════════════════════════════════
+(function () {
+  var nameEl = document.getElementById('cg-name');
+  if (!nameEl) return;
+  var editBtn = document.getElementById('cg-edit');
+  var undoBtn = document.getElementById('cg-undo');
+  var btns = [document.getElementById('cg-b0'), document.getElementById('cg-b1'), document.getElementById('cg-b2')];
+  var labelEls = [document.getElementById('cg-l0'), document.getElementById('cg-l1'), document.getElementById('cg-l2')];
+  var countEls = [document.getElementById('cg-c0'), document.getElementById('cg-c1'), document.getElementById('cg-c2')];
+  var modal = document.getElementById('cg-edit-modal');
+  var inName = document.getElementById('cg-edit-name');
+  var inL = [document.getElementById('cg-edit-l0'), document.getElementById('cg-edit-l1'), document.getElementById('cg-edit-l2')];
+  var saveBtn = document.getElementById('cg-edit-save');
+  var cancelBtn = document.getElementById('cg-edit-cancel');
+  var DEF = ['Try', 'Do', 'Fail'];
+
+  function ensure(d) {
+    if (!d.customGroup) d.customGroup = { name: 'Default', labels: ['Try', 'Do', 'Fail'], entries: [] };
+    if (!Array.isArray(d.customGroup.labels) || d.customGroup.labels.length < 3) d.customGroup.labels = ['Try', 'Do', 'Fail'];
+    if (!Array.isArray(d.customGroup.entries)) d.customGroup.entries = [];
+    return d;
+  }
+  function todayCount(d, idx) {
+    var t = today();
+    return d.customGroup.entries.filter(function (e) { return e.idx === idx && e.date === t; }).length;
+  }
+  function render() {
+    var d = load(); ensure(d);
+    nameEl.textContent = d.customGroup.name || 'Default';
+    for (var i = 0; i < 3; i++) {
+      labelEls[i].textContent = d.customGroup.labels[i] || DEF[i];
+      countEls[i].textContent = todayCount(d, i);
+    }
+  }
+  window.refreshCustomGroup = render;
+
+  function tap(idx, btn) {
+    var d = load(); ensure(d);
+    d.customGroup.entries.push({ idx: idx, date: today(), ts: new Date().toISOString() });
+    save(d);
+    Sound.play(['try', 'do', 'fail'][idx]);
+    var fc = ['flash-try', 'flash-do', 'flash-fail'][idx];
+    if (btn) { btn.classList.add(fc); setTimeout(function () { btn.classList.remove(fc); }, 150); }
+    render();
+    toast((d.customGroup.labels[idx] || DEF[idx]) + ' +1');
+  }
+  btns.forEach(function (b, i) { if (b) b.addEventListener('click', function () { tap(i, b); }); });
+
+  if (undoBtn) undoBtn.addEventListener('click', function () {
+    var d = load(); ensure(d); var t = today();
+    var idxs = d.customGroup.entries.reduce(function (a, e, i) { if (e.date === t) a.push(i); return a; }, []);
+    if (!idxs.length) { toast('nothing to undo today'); return; }
+    var rem = d.customGroup.entries.splice(idxs[idxs.length - 1], 1)[0];
+    save(d); render();
+    toast('undid ' + (d.customGroup.labels[rem.idx] || DEF[rem.idx]));
+  });
+
+  if (editBtn) editBtn.addEventListener('click', function () {
+    var d = load(); ensure(d);
+    inName.value = d.customGroup.name || 'Default';
+    for (var i = 0; i < 3; i++) inL[i].value = d.customGroup.labels[i] || '';
+    modal.style.display = 'flex';
+  });
+  if (saveBtn) saveBtn.addEventListener('click', function () {
+    var d = load(); ensure(d);
+    var nm = (inName.value || '').trim(); if (nm) d.customGroup.name = nm.slice(0, 24);
+    for (var i = 0; i < 3; i++) { var v = (inL[i].value || '').trim(); if (v) d.customGroup.labels[i] = v.slice(0, 16); }
+    save(d); render();
+    if (window.renderAchievements) window.renderAchievements();
+    modal.style.display = 'none'; toast('saved');
+  });
+  if (cancelBtn) cancelBtn.addEventListener('click', function () { modal.style.display = 'none'; });
+
+  render();
 })();
 
 

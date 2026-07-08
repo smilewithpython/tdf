@@ -1,4 +1,4 @@
-const CACHE = 'tdf-v13';
+const CACHE = 'tdf-v14';
 const ASSETS = ['index.html','manifest.json','icon-180.png','icon-192.png','icon-512.png'];
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(ASSETS); }).then(function () { return self.skipWaiting(); }));
@@ -17,4 +17,21 @@ self.addEventListener('fetch', function (e) {
     }).catch(function () { return cached || caches.match('index.html'); });
     return cached || net;
   }));
+});
+
+/* Reminders: user tapped a scheduled/foreground beep notification */
+self.addEventListener('notificationclick', function (e) {
+  e.notification.close();
+  var remId = e.notification.data && e.notification.data.remId;
+  e.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then(function (list) {
+        if (list.length) {
+          var c = list[0];
+          c.postMessage({ type: 'NOTIF_CLICKED', remId: remId });
+          return c.focus();
+        }
+        return self.clients.openWindow('./');
+      })
+  );
 });

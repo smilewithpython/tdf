@@ -686,6 +686,118 @@
     line-height: 2;
     padding: 40px 20px;
   }
+
+  /* ── EXTRA CALENDARS (spawned) ── */
+  .xcal-wrap { position: relative; }
+  .xcal-menu-btn {
+    background: var(--bg); border: 0.5px solid var(--border); border-radius: 8px;
+    color: var(--ink2); width: 30px; height: 30px; cursor: pointer; font-size: 14px;
+    -webkit-tap-highlight-color: transparent; -webkit-appearance: none; appearance: none;
+  }
+  .xcal-cell {
+    aspect-ratio: 1 / 1; border-radius: 9px;
+    display: flex; align-items: flex-start; justify-content: flex-end;
+    padding: 4px 6px; font-size: 11px; color: var(--ink3);
+    border: 0.5px solid var(--border); background: var(--bg);
+    -webkit-tap-highlight-color: transparent; cursor: pointer; user-select: none;
+    overflow: hidden; position: relative;
+  }
+  .xcal-cell.blank { border: none; background: transparent; cursor: default; }
+  .xcal-cell.locked { opacity: 0.4; cursor: default; }
+  .xcal-cell.today { box-shadow: 0 0 0 1.5px var(--ink2) inset; }
+  .xcal-cell .xcal-daynum { position: relative; z-index: 2; }
+  .xcal-cell .xcal-fill-stack {
+    position: absolute; inset: 0; display: flex; flex-direction: column-reverse; z-index: 1;
+  }
+  .xcal-cell .xcal-fill-seg { width: 100%; flex: 1 1 0; }
+  .xcal-cell.xcal-auto {
+    color: #2a0c0c; border-color: transparent; opacity: 0.92;
+    background-color: var(--fail);
+    background-image: repeating-linear-gradient(45deg, rgba(0,0,0,0.24) 0, rgba(0,0,0,0.24) 3px, transparent 3px, transparent 7px);
+  }
+  .xcal-cell.locked.xcal-auto { opacity: 0.85; }
+  .xcal-add-btn {
+    width: 100%; background: var(--bg2); border: 0.5px dashed var(--border); border-radius: var(--radius);
+    color: var(--ink3); font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 0.06em;
+    padding: 0.85rem; cursor: pointer; -webkit-tap-highlight-color: transparent;
+    -webkit-appearance: none; appearance: none;
+  }
+  .xcal-add-btn:active { transform: scale(0.98); }
+
+  /* punch-card popup for a single day */
+  .punch-overlay {
+    display: none; position: fixed; inset: 0; z-index: 210;
+    background: rgba(0,0,0,0.75); backdrop-filter: blur(4px);
+    align-items: center; justify-content: center;
+  }
+  .punch-overlay.open { display: flex; }
+  .punch-card {
+    background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius);
+    padding: 1.25rem; width: 88%; max-width: 340px; display: flex; flex-direction: column; gap: 1rem;
+  }
+  .punch-title { font-family: 'Playfair Display', serif; font-size: 1.05rem; color: var(--ink); }
+  .punch-sub { font-size: 11px; color: var(--ink3); line-height: 1.5; }
+  .punch-slots { display: flex; flex-direction: column; gap: 8px; }
+  .punch-slot {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    background: var(--bg); border: 0.5px solid var(--border); border-radius: 10px;
+    padding: 0.6rem 0.85rem; font-size: 12px; color: var(--ink3);
+  }
+  .punch-slot.filled { color: var(--ink); }
+  .punch-slot-label { flex: 1; }
+  .punch-colors { display: flex; gap: 6px; }
+  .punch-color-btn {
+    width: 28px; height: 28px; border-radius: 8px; border: 0.5px solid var(--border);
+    cursor: pointer; -webkit-tap-highlight-color: transparent; -webkit-appearance: none; appearance: none;
+    opacity: 0.55;
+  }
+  .punch-color-btn.active { opacity: 1; box-shadow: 0 0 0 1.5px var(--ink) inset; }
+  .punch-color-btn.c-green { background: var(--try); }
+  .punch-color-btn.c-yellow { background: var(--stock); }
+  .punch-color-btn.c-red { background: var(--fail); }
+  .punch-color-btn:disabled { opacity: 0.15; cursor: not-allowed; }
+  .punch-clear-btn {
+    background: none; border: none; color: var(--fail); font-size: 11px; cursor: pointer;
+    padding: 2px 6px; -webkit-tap-highlight-color: transparent;
+  }
+  .punch-close {
+    background: var(--trade); border: none; border-radius: 10px; color: #fff;
+    font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 0.06em; padding: 12px; cursor: pointer;
+  }
+
+  /* per-calendar settings modal */
+  .xcal-settings-overlay {
+    display: none; position: fixed; inset: 0; z-index: 210;
+    background: rgba(0,0,0,0.75); backdrop-filter: blur(4px);
+    align-items: center; justify-content: center;
+  }
+  .xcal-settings-overlay.open { display: flex; }
+  .xcal-settings-card {
+    background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius);
+    padding: 1.25rem; width: 88%; max-width: 340px; display: flex; flex-direction: column; gap: 0.85rem;
+  }
+  .xcal-settings-card input[type=text] {
+    background: var(--bg); border: 0.5px solid var(--border); border-radius: 8px;
+    color: var(--ink); font-family: 'DM Mono', monospace; font-size: 13px; padding: 10px;
+  }
+  .xcal-settings-card input[type=number] {
+    width: 72px; background: var(--bg); border: 0.5px solid var(--border); border-radius: 8px;
+    color: var(--ink); font-family: 'DM Mono', monospace; font-size: 13px; padding: 8px 10px; text-align: center;
+  }
+  .xcal-settings-row { display: flex; align-items: center; gap: 8px; }
+  .xcal-settings-actions { display: flex; gap: 8px; margin-top: 4px; }
+  .xcal-settings-save {
+    flex: 1; background: var(--trade); border: none; border-radius: 10px; color: #fff;
+    font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 0.06em; padding: 12px; cursor: pointer;
+  }
+  .xcal-settings-cancel {
+    flex: 1; background: none; border: 0.5px solid var(--border); border-radius: 10px; color: var(--ink3);
+    font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 0.06em; padding: 12px; cursor: pointer;
+  }
+  .xcal-settings-delete {
+    background: none; border: none; color: var(--fail); font-family: 'DM Mono', monospace;
+    font-size: 11px; letter-spacing: 0.06em; padding: 6px; cursor: pointer;
+  }
 </style>
 </head>
 <body>
@@ -944,6 +1056,10 @@
       <span><span class="cal-dot dot-auto"></span>missed</span>
     </div>
   </div>
+
+  <!-- ============ SPAWNED CALENDARS ============ -->
+  <div id="xcal-list" style="display:flex;flex-direction:column;gap:1.25rem;margin-top:1.25rem;"></div>
+  <button class="xcal-add-btn" id="xcal-add-btn" style="margin-top:0.25rem;">+ add calendar</button>
 
   <div class="divider"></div>
 
@@ -1205,6 +1321,34 @@
   </div>
 </div>
 
+<!-- ── PUNCH-CARD OVERLAY (spawned calendars) ── -->
+<div class="punch-overlay" id="punch-overlay">
+  <div class="punch-card">
+    <div class="punch-title" id="punch-title">—</div>
+    <div class="punch-sub" id="punch-sub">Tap a slot, then pick a color.</div>
+    <div class="punch-slots" id="punch-slots"></div>
+    <button class="punch-close" id="punch-close">Done</button>
+  </div>
+</div>
+
+<!-- ── EXTRA CALENDAR SETTINGS MODAL ── -->
+<div class="xcal-settings-overlay" id="xcal-settings-overlay">
+  <div class="xcal-settings-card">
+    <div style="font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--ink);">Calendar settings</div>
+    <div style="font-size:11px;color:var(--ink3);line-height:1.6;">Name this calendar and set how many times you can check in each day.</div>
+    <input type="text" id="xcal-set-name" placeholder="Calendar name" maxlength="30">
+    <div class="xcal-settings-row">
+      <span style="font-size:11px;color:var(--ink3);flex:1;">Check-ins per day</span>
+      <input type="number" id="xcal-set-target" min="1" max="20" value="1">
+    </div>
+    <div class="xcal-settings-actions">
+      <button class="xcal-settings-save" id="xcal-set-save">Save</button>
+      <button class="xcal-settings-cancel" id="xcal-set-cancel">Cancel</button>
+    </div>
+    <button class="xcal-settings-delete" id="xcal-set-delete">delete this calendar</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1230,6 +1374,7 @@ function fresh() {
     statOverrides: { tasks: {}, stock: {}, trading: {} },
     customGroup: { name: 'Default', labels: ['Try', 'Do', 'Fail'], entries: [] },
     leaderboard: null,
+    extraCalendars: [],
     streak: 0, lastDate: null,
     stockStreak: 0, stockLastDate: null,
     tradeStreak: 0, tradeLastDate: null
@@ -1554,7 +1699,7 @@ document.getElementById('import-file').addEventListener('change', function (ev) 
       const parsed = JSON.parse(reader.result);
       if (!Array.isArray(parsed.entries)) throw new Error('bad file');
       if (!confirm('Replace all current data with this backup? This cannot be undone.')) return;
-      save(Object.assign(fresh(), parsed)); render(); if (window.refreshCalendar) window.refreshCalendar(); if (window.refreshStopwatches) window.refreshStopwatches(); if (window.refreshCustomGroup) window.refreshCustomGroup(); if (window.renderLeaderboard) window.renderLeaderboard(); toast('backup imported');
+      save(Object.assign(fresh(), parsed)); render(); if (window.refreshCalendar) window.refreshCalendar(); if (window.refreshStopwatches) window.refreshStopwatches(); if (window.refreshCustomGroup) window.refreshCustomGroup(); if (window.renderLeaderboard) window.renderLeaderboard(); if (window.refreshExtraCalendars) window.refreshExtraCalendars(); toast('backup imported');
     } catch (e) { toast('could not read that file'); }
   };
   reader.readAsText(file); ev.target.value = '';
@@ -2051,6 +2196,322 @@ window.simOverlay = makeOverlay({
   nextBtn.addEventListener('click', function () { view.setMonth(view.getMonth() + 1); render(); });
 
   window.refreshCalendar = render;
+  render();
+  setInterval(render, 60000); // re-check across midnight so missed days auto-fill
+})();
+
+
+// ══════════════════════════════════════════════════════════════════
+// EXTRA CALENDARS — user-spawned punch-card calendars below Day Rating.
+// Each has its own name + a settable N (check-ins per day). Tapping a
+// day opens a punch-card popup with N slots; each slot gets a color
+// (green/yellow/red). The day cell renders as a vertically-stacked
+// proportional bar of the colors chosen. Same 14-day editable window
+// and auto-miss backfill as the Day Rating calendar.
+// ══════════════════════════════════════════════════════════════════
+(function () {
+  var listHost = document.getElementById('xcal-list');
+  var addBtn = document.getElementById('xcal-add-btn');
+  var punchOverlay = document.getElementById('punch-overlay');
+  var punchTitle = document.getElementById('punch-title');
+  var punchSub = document.getElementById('punch-sub');
+  var punchSlots = document.getElementById('punch-slots');
+  var punchClose = document.getElementById('punch-close');
+  var setOverlay = document.getElementById('xcal-settings-overlay');
+  var setName = document.getElementById('xcal-set-name');
+  var setTarget = document.getElementById('xcal-set-target');
+  var setSave = document.getElementById('xcal-set-save');
+  var setCancel = document.getElementById('xcal-set-cancel');
+  var setDelete = document.getElementById('xcal-set-delete');
+  if (!listHost) return;
+
+  var COLORS = ['green', 'yellow', 'red'];
+  var views = {}; // calId -> {year, month} for independent month navigation
+  var punchState = { calId: null, dateKey: null };
+  var settingsState = { calId: null };
+
+  function uid() { return 'xc' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+  function ymd(dt) { return dt.toLocaleDateString('en-CA'); }
+  function startOfDay(dt) { var x = new Date(dt); x.setHours(0, 0, 0, 0); return x; }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function editableRange() {
+    var t = startOfDay(new Date());
+    var earliest = new Date(t); earliest.setDate(earliest.getDate() - 14);
+    return { earliest: earliest, today: t };
+  }
+
+  function ensureCals(d) {
+    if (!Array.isArray(d.extraCalendars)) d.extraCalendars = [];
+    d.extraCalendars.forEach(function (c) {
+      if (!c.id) c.id = uid();
+      if (!c.name) c.name = 'Calendar';
+      if (!c.target || c.target < 1) c.target = 1;
+      if (!c.days) c.days = {}; // dateKey -> array of colors picked so far (length <= target)
+      if (!c.ratingStart) c.ratingStart = ymd(startOfDay(new Date()));
+    });
+    return d;
+  }
+
+  // Auto-miss backfill for a single calendar: any past day (from ratingStart
+  // through yesterday) with zero check-ins gets marked 'auto' (full-miss).
+  function backfillMissed(cal) {
+    var changed = false;
+    var todayKey = ymd(startOfDay(new Date()));
+    var cur = new Date(cal.ratingStart + 'T12:00:00');
+    var guard = 0;
+    while (guard++ < 4000) {
+      var key = ymd(startOfDay(cur));
+      if (key >= todayKey) break;
+      if (!cal.days[key]) { cal.days[key] = { auto: true, picks: [] }; changed = true; }
+      cur.setDate(cur.getDate() + 1);
+    }
+    return changed;
+  }
+
+  function dayEntry(cal, key) {
+    return cal.days[key] || null;
+  }
+
+  // Build the stacked-bar background for a cell given its picks + target
+  function fillStackHtml(picks, target) {
+    if (!picks || !picks.length) return '';
+    var segPct = 100 / target;
+    var segs = picks.map(function (c) {
+      var color = c === 'green' ? 'var(--try)' : c === 'yellow' ? 'var(--stock)' : 'var(--fail)';
+      return '<div class="xcal-fill-seg" style="background:' + color + ';flex-basis:' + segPct + '%;"></div>';
+    }).join('');
+    return '<div class="xcal-fill-stack">' + segs + '</div>';
+  }
+
+  function renderOne(cal) {
+    if (!views[cal.id]) { var v = new Date(); views[cal.id] = { year: v.getFullYear(), month: v.getMonth() }; }
+    var view = views[cal.id];
+    var DOW = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+    var y = view.year, m = view.month;
+    var lead = new Date(y, m, 1).getDay();
+    var daysInMonth = new Date(y, m + 1, 0).getDate();
+    var rng = editableRange();
+    var cells = [];
+    for (var i = 0; i < lead; i++) cells.push('<div class="xcal-cell blank"></div>');
+    for (var day = 1; day <= daysInMonth; day++) {
+      var dt = startOfDay(new Date(y, m, day));
+      var key = ymd(dt);
+      var editable = dt >= rng.earliest && dt <= rng.today;
+      var entry = dayEntry(cal, key);
+      var cls = 'xcal-cell';
+      var fillHtml = '';
+      if (entry && entry.auto) {
+        cls += ' xcal-auto';
+      } else if (entry && entry.picks && entry.picks.length) {
+        fillHtml = fillStackHtml(entry.picks, cal.target);
+      }
+      if (!editable) cls += ' locked';
+      if (dt.getTime() === rng.today.getTime()) cls += ' today';
+      cells.push('<div class="' + cls + '" data-key="' + key + '" data-cal="' + cal.id + '" data-editable="' + (editable ? 1 : 0) + '">' +
+        fillHtml + '<span class="xcal-daynum">' + day + '</span></div>');
+    }
+    var now = new Date();
+    var nextDisabled = (y > now.getFullYear() || (y === now.getFullYear() && m >= now.getMonth()));
+    var monthLabel = new Date(y, m, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+    return '<div class="cal-wrap xcal-wrap" data-cal-wrap="' + cal.id + '">' +
+      '<div class="cal-head">' +
+        '<span class="cal-title">' + esc(cal.name) + '</span>' +
+        '<div class="cal-nav">' +
+          '<button class="xcal-prev" data-cal="' + cal.id + '" aria-label="previous month">‹</button>' +
+          '<button class="xcal-next" data-cal="' + cal.id + '" aria-label="next month" ' + (nextDisabled ? 'disabled' : '') + '>›</button>' +
+          '<button class="xcal-menu-btn" data-cal="' + cal.id + '" data-xcal-settings="1" aria-label="calendar settings">⚙</button>' +
+        '</div>' +
+      '</div>' +
+      '<div style="font-size:10px;color:var(--ink3);letter-spacing:0.06em;margin:-4px 0 8px;">' + monthLabel + ' · ' + cal.target + '× per day</div>' +
+      '<div class="cal-grid xcal-dow-row">' + DOW.map(function (dd) { return '<div class="cal-dow">' + dd + '</div>'; }).join('') + '</div>' +
+      '<div class="cal-grid" style="margin-top:5px;">' + cells.join('') + '</div>' +
+      '<div class="cal-legend">' +
+        '<span><span class="cal-dot" style="background:var(--try);"></span>good</span>' +
+        '<span><span class="cal-dot" style="background:var(--stock);"></span>ok</span>' +
+        '<span><span class="cal-dot" style="background:var(--fail);"></span>rough</span>' +
+        '<span><span class="cal-dot dot-auto"></span>missed</span>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function render() {
+    var d = load(); ensureCals(d);
+    var changed = false;
+    d.extraCalendars.forEach(function (cal) { if (backfillMissed(cal)) changed = true; });
+    if (changed) save(d);
+    if (!d.extraCalendars.length) {
+      listHost.innerHTML = '';
+      return;
+    }
+    listHost.innerHTML = d.extraCalendars.map(renderOne).join('');
+  }
+  window.refreshExtraCalendars = render;
+
+  // ── month nav + cell taps + settings gear (event delegation) ──
+  listHost.addEventListener('click', function (e) {
+    var t = e.target;
+    var prevBtn = t.closest ? t.closest('.xcal-prev') : null;
+    var nextBtn = t.closest ? t.closest('.xcal-next') : null;
+    var gearBtn = t.closest ? t.closest('[data-xcal-settings]') : null;
+    var cell = t.closest ? t.closest('.xcal-cell') : null;
+
+    if (gearBtn) {
+      openSettings(gearBtn.getAttribute('data-cal'));
+      return;
+    }
+    if (prevBtn) {
+      var id1 = prevBtn.getAttribute('data-cal');
+      if (!views[id1]) return;
+      views[id1].month -= 1;
+      if (views[id1].month < 0) { views[id1].month = 11; views[id1].year -= 1; }
+      render();
+      return;
+    }
+    if (nextBtn) {
+      if (nextBtn.disabled) return;
+      var id2 = nextBtn.getAttribute('data-cal');
+      if (!views[id2]) return;
+      views[id2].month += 1;
+      if (views[id2].month > 11) { views[id2].month = 0; views[id2].year += 1; }
+      render();
+      return;
+    }
+    if (cell && !cell.classList.contains('blank')) {
+      if (cell.getAttribute('data-editable') !== '1') { toast('only the last 2 weeks are editable'); return; }
+      openPunch(cell.getAttribute('data-cal'), cell.getAttribute('data-key'));
+      return;
+    }
+  });
+
+  // ── punch card popup ──
+  function openPunch(calId, dateKey) {
+    var d = load(); ensureCals(d);
+    var cal = d.extraCalendars.filter(function (c) { return c.id === calId; })[0];
+    if (!cal) return;
+    punchState.calId = calId; punchState.dateKey = dateKey;
+    var entry = cal.days[dateKey];
+    var picks = (entry && !entry.auto) ? (entry.picks || []) : [];
+    var dispDate = new Date(dateKey + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+    punchTitle.textContent = esc(cal.name) + ' — ' + dispDate;
+    punchSub.textContent = picks.length + ' of ' + cal.target + ' check-ins logged. Tap a slot, then choose a color.';
+    buildPunchSlots(cal, picks);
+    punchOverlay.classList.add('open');
+  }
+  function buildPunchSlots(cal, picks) {
+    var html = '';
+    for (var i = 0; i < cal.target; i++) {
+      var filled = i < picks.length;
+      var unlocked = i <= picks.length; // can fill the next empty slot only
+      var curColor = filled ? picks[i] : null;
+      html += '<div class="punch-slot' + (filled ? ' filled' : '') + '">' +
+        '<span class="punch-slot-label">Check-in ' + (i + 1) + '</span>' +
+        '<div class="punch-colors">' +
+          COLORS.map(function (c) {
+            var active = curColor === c;
+            var disabled = !unlocked;
+            return '<button class="punch-color-btn c-' + c + (active ? ' active' : '') + '" data-slot="' + i + '" data-color="' + c + '" ' + (disabled ? 'disabled' : '') + '></button>';
+          }).join('') +
+        '</div>' +
+      '</div>';
+    }
+    punchSlots.innerHTML = html;
+    if (picks.length) {
+      punchSlots.innerHTML += '<button class="punch-clear-btn" id="punch-clear-all">clear all check-ins for this day</button>';
+    }
+  }
+  punchSlots.addEventListener('click', function (e) {
+    var btn = e.target.closest ? e.target.closest('.punch-color-btn') : null;
+    var clearBtn = e.target.closest ? e.target.closest('#punch-clear-all') : null;
+    if (clearBtn) {
+      var d0 = load(); ensureCals(d0);
+      var cal0 = d0.extraCalendars.filter(function (c) { return c.id === punchState.calId; })[0];
+      if (!cal0) return;
+      delete cal0.days[punchState.dateKey];
+      save(d0); render();
+      var picks0 = [];
+      punchSub.textContent = '0 of ' + cal0.target + ' check-ins logged. Tap a slot, then choose a color.';
+      buildPunchSlots(cal0, picks0);
+      if (navigator.vibrate) navigator.vibrate(8);
+      return;
+    }
+    if (!btn || btn.disabled) return;
+    var slotIdx = parseInt(btn.getAttribute('data-slot'), 10);
+    var color = btn.getAttribute('data-color');
+    var d = load(); ensureCals(d);
+    var cal = d.extraCalendars.filter(function (c) { return c.id === punchState.calId; })[0];
+    if (!cal) return;
+    var entry = cal.days[punchState.dateKey];
+    var picks = (entry && !entry.auto) ? (entry.picks || []).slice() : [];
+    if (slotIdx > picks.length) return; // must fill in order
+    picks[slotIdx] = color;
+    picks = picks.slice(0, cal.target);
+    cal.days[punchState.dateKey] = { auto: false, picks: picks };
+    save(d); render();
+    punchSub.textContent = picks.length + ' of ' + cal.target + ' check-ins logged. Tap a slot, then choose a color.';
+    buildPunchSlots(cal, picks);
+    if (navigator.vibrate) navigator.vibrate(8);
+  });
+  punchClose.addEventListener('click', function () {
+    punchOverlay.classList.remove('open');
+    punchState.calId = null; punchState.dateKey = null;
+  });
+
+  // ── add calendar ──
+  addBtn.addEventListener('click', function () {
+    var d = load(); ensureCals(d);
+    var cal = { id: uid(), name: 'Calendar ' + (d.extraCalendars.length + 1), target: 1, days: {}, ratingStart: ymd(startOfDay(new Date())) };
+    d.extraCalendars.push(cal);
+    save(d); render();
+    if (navigator.vibrate) navigator.vibrate(8);
+    toast('calendar added — tap ⚙ to name it');
+  });
+
+  // ── per-calendar settings modal ──
+  function openSettings(calId) {
+    var d = load(); ensureCals(d);
+    var cal = d.extraCalendars.filter(function (c) { return c.id === calId; })[0];
+    if (!cal) return;
+    settingsState.calId = calId;
+    setName.value = cal.name;
+    setTarget.value = cal.target;
+    setOverlay.classList.add('open');
+  }
+  setSave.addEventListener('click', function () {
+    if (!settingsState.calId) { setOverlay.classList.remove('open'); return; }
+    var d = load(); ensureCals(d);
+    var cal = d.extraCalendars.filter(function (c) { return c.id === settingsState.calId; })[0];
+    if (cal) {
+      var nm = (setName.value || '').trim();
+      if (nm) cal.name = nm.slice(0, 30);
+      var tgt = parseInt(setTarget.value, 10);
+      if (!isNaN(tgt) && tgt >= 1) {
+        // If target shrinks, trim any existing picks for stored days so
+        // the stacked bar math stays consistent.
+        if (tgt < cal.target) {
+          Object.keys(cal.days).forEach(function (k) {
+            var e = cal.days[k];
+            if (e && !e.auto && e.picks && e.picks.length > tgt) e.picks = e.picks.slice(0, tgt);
+          });
+        }
+        cal.target = Math.min(20, tgt);
+      }
+      save(d); render();
+      toast('calendar settings saved');
+    }
+    setOverlay.classList.remove('open'); settingsState.calId = null;
+  });
+  setCancel.addEventListener('click', function () { setOverlay.classList.remove('open'); settingsState.calId = null; });
+  setDelete.addEventListener('click', function () {
+    if (!settingsState.calId) return;
+    if (!confirm('Delete this calendar? Its history will be lost.')) return;
+    var d = load(); ensureCals(d);
+    d.extraCalendars = d.extraCalendars.filter(function (c) { return c.id !== settingsState.calId; });
+    save(d); render();
+    setOverlay.classList.remove('open'); settingsState.calId = null;
+    toast('calendar deleted');
+  });
+
   render();
   setInterval(render, 60000); // re-check across midnight so missed days auto-fill
 })();
